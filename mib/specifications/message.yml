@@ -1,0 +1,11 @@
+openapi: "3.0.1"
+info:
+  title: Users Service API
+  description: Users Microservice of Message in a Bottle Application
+  version: "0.1"
+
+servers:
+  - url: /
+
+paths:
+  

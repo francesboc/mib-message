@@ -1,0 +1,16 @@
+#
+# Flask Configuration
+#
+#------------------------
+FLASK_ENV=production
+
+#
+# Postgres configuration
+#
+#------------------------
+#
+# POSTGRES_HOST=
+#
+POSTGRES_PASSWORD=abcd
+POSTGRES_USER=mib_users_ms
+POSTGRES_DB=mib_users_ms

@@ -1,0 +1,51 @@
+#
+# Message in A bottle Docker Compose file
+#
+
+version: "3.6"
+
+services:
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      # this is only for development purpose
+      - "5342:5342"
+    env_file:
+      - env_file
+
+  mib_messages:
+    <<: &mib_messages
+      # Building the image
+      image: "mib-messages:latest"
+      build:
+        context: .
+        dockerfile: Dockerfile 
+
+    ports:
+     - "5000:5000"
+    env_file:
+      - env_file
+    environment:
+      - POSTGRES_HOST=db
+    depends_on:
+      - db
+      - migrations
+
+  migrations:
+    #
+    # this service is used to apply migrations on db
+    #
+    <<: *mib_messages
+    command: flask db upgrade
+    env_file:
+      - env_file
+    environment:
+      - POSTGRES_HOST=db
+    restart: on-failure
+
+# Declaring all volumes
+volumes:
+  pgdata: # for maintaing db data
