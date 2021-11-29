@@ -4,7 +4,7 @@
 FROM python:3.8
 LABEL maintainer="<squa_id>_squad"
 LABEL version="1.0"
-LABEL description="Message in a Bottle User Microservice"
+LABEL description="Message in a Bottle Message Microservice"
 
 # creating the environment
 COPY . /app

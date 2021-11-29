@@ -21,11 +21,11 @@ class TestMyClass(unittest.TestCase):
             objects you need for testing,
             and set it as class properties
         '''
-        from mib.models import user
-        cls.user = user
+        from mib.models import message
+        cls.message = message
 
     def test_restaurant(self):
-        rest = self.user.User()
+        rest = self.message.Message()
         # test it
 ``` 
 
