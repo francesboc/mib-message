@@ -1,18 +1,36 @@
-openapi: "3.0.1"
+openapi: 3.0.1
 info:
   title: Users Service API
   description: Users Microservice of Message in a Bottle Application
-  version: "0.1"
-
+  version: '0.1'
 servers:
   - url: /
-
 paths:
-  /messages/{sender_id}:
+  /messages/received/{receiver_id}:
     get:
-      tags: [ Message ]
-      description: Get the list of sent and drafted messages
-      operationId: mib.resources.messages.get_messages
+      tags:
+        - Messages
+      description: Get the list message of the receiver when the delivery date is pass 
+      operationId: mib.resources.messages.get_messages_receive
+      parameters:
+        - name: receiver_id
+          description: User unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Return list of messages
+        default:
+          description: An error occured during retrieving the message list
+  /messages/send/{sender_id}:
+    get:
+      tags:
+        - Messages
+      description: Get the list of sent messages
+      operationId: mib.resources.messages.get_messages_send
       parameters:
         - name: sender_id
           description: User unique ID
@@ -22,19 +40,91 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: Return list of messages
         default:
           description: An error occured during retrieving the message list
+  /messages/draft/{sender_id}:
+    get:
+      tags:
+        - Messages
+      description: Get the list of drafted messages
+      operationId: mib.resources.messages.get_messages_draft
+      parameters:
+        - name: sender_id
+          description: User unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Return list of messages
+        default:
+          description: An error occured during retrieving the message list
+  /message:
+    post:
+      summary: Send a message
+      tags:
+        - Message
+      operationId: mib.resources.message.send
+      requestBody:
+        description: Create a new message with the list of receiver the content and the sender
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'     
+      responses:
+        201:
+          description: Created
+        default:
+          description: Error during message sending
 
 components:
   schemas:
     Message:
       required:
         - sender
+        - content
       type: object
       properties:
         sender:
-          type: int
-          description: First name of customer
+          type: integer
+          description: Id of the message's sender
           example: 1
+        date_of_delivery:
+          type: string
+          description: Date and time when the message will be send
+          example: '12/01/2022 10:21'
+        content:
+          type: string
+          description: Text of the message
+          example: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC'
+        title:
+          type: string
+          description: Message title
+          example: 'New Message to you'
+        bad_content:
+          type: boolean
+          description: Customer phone number
+          example: False
+        number_bad:
+          type: integer
+          description: Number of bad word in the message
+          example: 0
+        font:
+          type: string
+          description: Description of the font of the message
+          example: 'Arial'
+        is_draft:
+          type: boolean
+          description: Describe is the message is finish or not
+          example: False
+        receivers:
+          type: array
+          items:
+            type: integer
+          description: List of users who will receive the message
+          example: [2,1]
