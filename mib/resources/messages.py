@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from sqlalchemy.orm.base import NEVER_SET
 from mib.dao.message_manager import MessageManager
 from mib.dao.image_manager import ImageManager
 from mib.dao.msglist_manager import MsglistManager
@@ -6,6 +7,7 @@ from mib.models.message import Message, Image
 from datetime import datetime
 import json
 
+import json
 def get_all_messages(sender_id):
     """Get the list of sent and drafted messages
     """
@@ -20,46 +22,22 @@ def get_all_messages(sender_id):
 
     return jsonify({"_sent": sent_serialized, "_draft": draft_serialized}), 200
 
-def get_messages_received(receiver_id):
-    return 'TODO'
-def get_messages_sent(sender_id):
-    return 'TODO'
-def get_messages_drafted(sender_id):
-    return 'TODO'
-
 # Check if the message data are correct
 def verif_data(data):
-    if len(data["destinator"])>=1: # At least one receiver
+    if len(data["receivers"])>=1: # At least one receiver
         if data["date_of_delivery"] != "" and data["time_of_delivery"] != "": #check the oresence of delivery date and time
-            new_date = data["date_of_delivery"] +" "+data["time_of_delivery"] #concat date and time
-            delivery = datetime.strptime(new_date,'%Y-%m-%d %H:%M')
+            delivery=merge_date_time(data['date_of_delivery'],data['time_of_delivery'])
             if delivery>datetime.today(): #check that delivery date is in future
                 return "OK"
         return "Date not valid"
     else:
         return "No destinator"
-
-def send():
-    get_data = request.get_json()
-    r = verif_data(get_data) #check on date of delivery
-    if r=="OK":
-        msg = Message()
-        msg.sender= get_data['sender']
-        msg.title = get_data['title']
-        msg.content = get_data['content']
-        msg.date_of_delivery = datetime.strptime(get_data['date_of_delivery'],'%Y-%m-%d %H:%M')
-        msg.font = get_data["font"]
-        result = API_call(get_data['content']) # Check for bad content
-        if(result['is-bad']==True):
-            msg.bad_content=True
-            msg.number_bad = len(result["bad-words-list"])
-        else:
-            msg.bad_content=False
-            msg.number_bad = 0
-    response_object = {
-        'status': 'success',
-        'message': 'Successfully registered', }
-    return jsonify(response_object), 201
+        
+def merge_date_time(date,time):
+    new_date = date +" "+time
+    new_date = datetime.strptime(new_date,'%Y-%m-%d %H:%M')
+    
+    return new_date
 
 def API_call(content):
     import urllib.request,urllib.parse, urllib.error
@@ -74,6 +52,42 @@ def API_call(content):
         req = urllib.request.Request(url, data=postdata)
     response = urllib.request.urlopen(req)
     return json.loads(response.read().decode("utf-8"))
+    
+def send():
+    get_data = request.get_json()
+    r = verif_data(get_data) #check on date of delivery
+    if r=="OK":
+        message = Message()
+        message.set_title(get_data["title"])
+        message.set_content(get_data["content"])
+        message.set_font(get_data["font"])
+        message.set_sender(get_data["sender"])
+        message.set_delivery_date = merge_date_time(get_data['date_of_delivery'],get_data['time_of_delivery'])
+        message.set_draft(False)
+
+        result = API_call(get_data['content']) # Check for bad content
+        if(result['is-bad']==True):
+            message.bad_content=True
+            message.number_bad = len(result["bad-words-list"])
+        else:
+            message.bad_content=False
+            message.number_bad = 0
+        MessageManager.create_message(message)
+        MsglistManager.add_receivers(message.get_id(), get_data['receivers'])
+        list_of_images = request.files
+        for image in list_of_images:
+            img = Image()
+            img.set_image(list_of_images[image].read())
+            img.set_mimetype(list_of_images[image].mimetype)
+            img.set_message(message.get_id())
+            ImageManager.add_image(image)
+        
+        
+    response_object = {
+        'status': r,
+        'message': r, }
+    return jsonify(response_object), 201
+
 
 def get_messages_received():
     return 
@@ -83,9 +97,6 @@ def get_messages_sent():
 
 def get_messages_drafted(sender_id):
     return 
-
-def send_message():
-    return
 
 def draft_message():
     """This method allows the creation of a new drafted message.
