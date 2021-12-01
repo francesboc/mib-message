@@ -68,7 +68,7 @@ paths:
       summary: Send a message
       tags:
         - Message
-      operationId: mib.resources.message.send
+      operationId: mib.resources.messages.send
       requestBody:
         description: Create a new message with the list of receiver the content and the sender
         required: true
