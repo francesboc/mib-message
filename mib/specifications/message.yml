@@ -140,8 +140,12 @@ components:
           example: 1
         date_of_delivery:
           type: string
-          description: Date and time when the message will be send
-          example: '12/01/2022 10:21'
+          description: Date when the message will be sent
+          example: '2022-01-01'
+        time_of_delivery:
+          type: string
+          description: Time when the message will be sent
+          example: '10:21'
         content:
           type: string
           description: Text of the message
