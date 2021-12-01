@@ -5,6 +5,7 @@ from mib.dao.image_manager import ImageManager
 from mib.dao.msglist_manager import MsglistManager
 from mib.models.message import Message, Image
 from datetime import datetime
+import json
 
 import json
 def get_all_messages(sender_id):
@@ -20,9 +21,6 @@ def get_all_messages(sender_id):
     draft_serialized = [ message.serialize() for message in _drafted_messages]
 
     return jsonify({"_sent": sent_serialized, "_draft": draft_serialized}), 200
-
-
-
 
 # Check if the message data are correct
 def verif_data(data):
