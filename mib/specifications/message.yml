@@ -29,7 +29,7 @@ paths:
       tags:
         - Messages
       description: Get the list message of the receiver when the delivery date is pass 
-      operationId: mib.resources.messages.get_messages_receive
+      operationId: mib.resources.messages.get_messages_received
       parameters:
         - name: receiver_id
           description: User unique ID
@@ -48,7 +48,7 @@ paths:
       tags:
         - Messages
       description: Get the list of sent messages
-      operationId: mib.resources.messages.get_messages_send
+      operationId: mib.resources.messages.get_messages_sent
       parameters:
         - name: sender_id
           description: User unique ID
@@ -67,7 +67,7 @@ paths:
       tags:
         - Messages
       description: Get the list of drafted messages
-      operationId: mib.resources.messages.get_messages_draft
+      operationId: mib.resources.messages.get_messages_drafted
       parameters:
         - name: sender_id
           description: User unique ID
@@ -108,7 +108,7 @@ paths:
       summary: Send a message
       tags:
         - Message
-      operationId: mib.resources.message.send
+      operationId: mib.resources.messages.send_message
       requestBody:
         description: Create a new message with the list of receiver the content and the sender
         required: true

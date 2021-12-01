@@ -19,6 +19,17 @@ def get_all_messages(sender_id):
 
     return jsonify({"_sent": sent_serialized, "_draft": draft_serialized}), 200
 
+def get_messages_received():
+    return 
+
+def get_messages_sent():
+    return
+
+def get_messages_drafted(sender_id):
+    return 
+
+def send_message():
+    return
 
 def draft_message():
     """This method allows the creation of a new drafted message.
