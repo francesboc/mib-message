@@ -4,6 +4,7 @@ from mib.dao.image_manager import ImageManager
 from mib.dao.msglist_manager import MsglistManager
 from mib.models.message import Message, Image
 from datetime import datetime
+import json
 
 def get_all_messages(sender_id):
     """Get the list of sent and drafted messages
@@ -19,13 +20,12 @@ def get_all_messages(sender_id):
 
     return jsonify({"_sent": sent_serialized, "_draft": draft_serialized}), 200
 
-def get_messages_receive(receiver_id):
+def get_messages_received(receiver_id):
     return 'TODO'
-def get_messages_send(sender_id):
+def get_messages_sent(sender_id):
     return 'TODO'
-def get_messages_draft(sender_id):
+def get_messages_drafted(sender_id):
     return 'TODO'
-
 
 # Check if the message data are correct
 def verif_data(data):
@@ -74,6 +74,7 @@ def API_call(content):
         req = urllib.request.Request(url, data=postdata)
     response = urllib.request.urlopen(req)
     return json.loads(response.read().decode("utf-8"))
+
 def get_messages_received():
     return 
 
