@@ -16,7 +16,7 @@ class Message(db.Model):
     __tablename__ = 'Message'
     
     # A list of fields to be serialized
-    SERIALIZE_LIST = ['id', 'sender', 'title', 'content']
+    SERIALIZE_LIST = ['id', 'sender', 'title', 'content','date_of_delivery']
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     sender = db.Column(db.Integer)

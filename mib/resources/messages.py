@@ -38,7 +38,6 @@ def verif_data(data):
 def merge_date_time(date,time):
     new_date = date +" "+time
     new_date = datetime.strptime(new_date,'%Y-%m-%d %H:%M')
-    
     return new_date
 
 def API_call(content):
@@ -64,7 +63,7 @@ def send():
         message.set_content(get_data["content"])
         message.set_font(get_data["font"])
         message.set_sender(get_data["sender"])
-        message.set_delivery_date = merge_date_time(get_data['date_of_delivery'],get_data['time_of_delivery'])
+        message.set_delivery_date( merge_date_time(get_data['date_of_delivery'],get_data['time_of_delivery']) )
         message.set_draft(False)
 
         result = API_call(get_data['content']) # Check for bad content
@@ -91,8 +90,11 @@ def send():
     return jsonify(response_object), 201
 
 
-def get_messages_received():
-    return 
+def get_messages_received(receiver_id):
+    list_messages = MessageManager.get_all_new(receiver_id)
+    result = [msg.serialize() for msg in list_messages]
+
+    return jsonify({ "msg_list": result}), 200
 
 def get_messages_sent():
     return

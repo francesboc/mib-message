@@ -1,5 +1,6 @@
+from datetime import date, datetime
 from mib.dao.manager import Manager
-from mib.models.message import Message
+from mib.models.message import Message,msglist
 from sqlalchemy import update
 from mib import db
 
@@ -32,6 +33,10 @@ class MessageManager(Manager):
         
         db.session.execute(stmt)
         db.session.commit()
+    @staticmethod
+    def get_all_new(rec_id):
+        return Message.query.filter(Message.date_of_delivery<=datetime.now()).filter(msglist.c.user_id==rec_id,msglist.c.msg_id==Message.id).all()
+        
 
     #@staticmethod
     #def retrieve_by_email(email):
