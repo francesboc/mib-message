@@ -49,7 +49,7 @@ def draft_message():
     except KeyError:
         user_id_to_delete = []
 
-    list_of_receiver = set(post_data.get('destinator'))
+    list_of_receiver = post_data.get('receivers')
     # allowing draft with at least one destinator specified
     if len(list_of_receiver) == 0:
         return jsonify({
@@ -97,7 +97,7 @@ def draft_message():
         MessageManager.update_draft(msg_id, title, content, new_date, font)
 
         response_object = {
-            'message': _message.serialize(),
+            'message_obj': _message.serialize(),
             'status': 'success',
             'message': 'Successfully draft creation'
         }

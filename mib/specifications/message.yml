@@ -8,6 +8,7 @@ servers:
 paths:
   /messages/all/{sender_id}:
     get:
+      summary: Retrieve sent and draft messages from a specific sender ID
       tags: [ Messages ]
       description: Get the list of sent and drafted messages
       operationId: mib.resources.messages.get_all_messages
@@ -26,6 +27,7 @@ paths:
           description: An error occured during retrieving the message list
   /messages/received/{receiver_id}:
     get:
+      summary: Retrieve all messages received by receiver ID
       tags:
         - Messages
       description: Get the list message of the receiver when the delivery date is pass 
@@ -45,6 +47,7 @@ paths:
           description: An error occured during retrieving the message list
   /messages/send/{sender_id}:
     get:
+      summary: Get the list of messages sent by sender ID
       tags:
         - Messages
       description: Get the list of sent messages
@@ -64,6 +67,7 @@ paths:
           description: An error occured during retrieving the message list
   /messages/draft/{sender_id}:
     get:
+      summary: Get the list of messages drafted by sender ID
       tags:
         - Messages
       description: Get the list of drafted messages
@@ -83,6 +87,7 @@ paths:
           description: An error occured during retrieving the message list
   /message/draft:
     post:
+      summary: Save a draft message
       tags:
         - Message
       description: Create a new drafted message
@@ -178,8 +183,12 @@ components:
           example: 1
         date_of_delivery:
           type: string
-          description: Date and time when the message will be send
-          example: '12/01/2022 10:21'
+          description: Date when the message will be sent
+          example: '12/01/2022'
+        time_of_delivery:
+          type: string
+          description: Time when the message will be sent
+          example: '10:21'
         content:
           type: string
           description: Text of the message

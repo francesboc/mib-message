@@ -16,11 +16,11 @@ class MessageManager(Manager):
 
     @staticmethod
     def retrieve_sent_by_id(sender_id):
-        return []
+       return Message.query.filter(Message.id == sender_id).filter(Message.is_draft == False).all()
 
     @staticmethod
     def retrieve_drafted_by_id(sender_id):
-        return []
+        return Message.query.filter(Message.id == sender_id).filter(Message.is_draft == True).all()
     
     @staticmethod
     def update_draft(msg_id, title, content, new_date, font):
