@@ -6,6 +6,24 @@ info:
 servers:
   - url: /
 paths:
+  /messages/all/{sender_id}:
+    get:
+      tags: [ Messages ]
+      description: Get the list of sent and drafted messages
+      operationId: mib.resources.messages.get_all_messages
+      parameters:
+        - name: sender_id
+          description: User unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Return list of all messages
+        default:
+          description: An error occured during retrieving the message list
   /messages/received/{receiver_id}:
     get:
       tags:
@@ -63,6 +81,28 @@ paths:
           description: Return list of messages
         default:
           description: An error occured during retrieving the message list
+  /message/draft:
+    post:
+      tags:
+        - Message
+      description: Create a new drafted message
+      operationId: mib.resources.messages.draft_message
+      requestBody:
+        description: Draft message
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Draft'
+      responses:
+        '200':
+          description: Drafted message modified
+        '201':
+          description: Draft message created
+        '400':
+          description: Wrong draft creation request
+        default:
+          description: An error occured during retrieving the message list
   /message:
     post:
       summary: Send a message
@@ -81,7 +121,6 @@ paths:
           description: Created
         default:
           description: Error during message sending
-
 components:
   schemas:
     Message:
@@ -122,6 +161,49 @@ components:
           type: boolean
           description: Describe is the message is finish or not
           example: False
+        receivers:
+          type: array
+          items:
+            type: integer
+          description: List of users who will receive the message
+          example: [2,1]
+    Draft:
+      required:
+        - sender
+      type: object
+      properties:
+        sender:
+          type: integer
+          description: Id of the message's sender
+          example: 1
+        date_of_delivery:
+          type: string
+          description: Date and time when the message will be send
+          example: '12/01/2022 10:21'
+        content:
+          type: string
+          description: Text of the message
+          example: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC'
+        title:
+          type: string
+          description: Message title
+          example: 'New Message to you'
+        bad_content:
+          type: boolean
+          description: Detect bad content in the message
+          example: False
+        number_bad:
+          type: integer
+          description: Number of bad word in the message
+          example: 0
+        font:
+          type: string
+          description: Description of the font of the message
+          example: 'Arial'
+        is_draft:
+          type: boolean
+          description: Describe is the message is finish or not
+          example: True
         receivers:
           type: array
           items:

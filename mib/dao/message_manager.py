@@ -1,12 +1,13 @@
 from mib.dao.manager import Manager
 from mib.models.message import Message
-
+from sqlalchemy import update
+from mib import db
 
 class MessageManager(Manager):
 
-    #@staticmethod
-    #def create_user(user: User):
-    #    Manager.create(user=user)
+    @staticmethod
+    def create_message(message: Message):
+        Manager.create(message=message)
 
     @staticmethod
     def retrieve_by_id(id_):
@@ -20,7 +21,18 @@ class MessageManager(Manager):
     @staticmethod
     def retrieve_drafted_by_id(sender_id):
         return []
+    
+    @staticmethod
+    def update_draft(msg_id, title, content, new_date, font):
+        stmt = (
+            update(Message).
+            where(Message.id==int(msg_id)).
+            values(title=title, content=content,date_of_delivery=new_date,font=font)
+        )
         
+        db.session.execute(stmt)
+        db.session.commit()
+
     #@staticmethod
     #def retrieve_by_email(email):
     #    Manager.check_none(email=email)

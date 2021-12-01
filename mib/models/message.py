@@ -4,7 +4,7 @@ from mib import db
 
 msglist = db.Table('msglist',
     db.Column('msg_id', db.Integer, db.ForeignKey('Message.id'), primary_key=True),
-    db.Column('user_id', db.Integer, db.ForeignKey('Message.sender'), primary_key=True),
+    db.Column('user_id', db.Integer, primary_key=True),
     db.Column('read',db.Boolean, default=False),
     db.Column('notified',db.Boolean, default=False),
     db.Column('hasReported', db.Boolean, default=False) #this is to know if a user has already reported a specific message
@@ -28,7 +28,10 @@ class Message(db.Model):
     images = relationship("Image", cascade="all,delete", backref="Message")
     font = db.Column(db.Unicode(128), default = "Times New Roman") 
     is_draft = db.Column(db.Boolean, default=False)
-    
+    receivers = relationship('Message', secondary=msglist,
+        primaryjoin=id==msglist.c.msg_id,
+        backref="msg_id",
+        lazy="dynamic")
     
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
@@ -42,8 +45,14 @@ class Message(db.Model):
     def set_title(self, title):
         self.title = title
 
+    def set_font(self, font):
+        self.font = font
+
     def set_delivery_date(self, date):
         self.date_of_delivery = date
+
+    def set_draft(self, is_draft):
+        self.is_draft = is_draft
 
     def get_id(self):
         return self.id
@@ -60,3 +69,12 @@ class Image(db.Model):
 
     def __init__(self, *args, **kw):
         super(Image, self).__init__(*args, **kw)
+    
+    def set_image(self, image):
+        self.image = image
+    
+    def set_mimetype(self, mimetype):
+        self.mimetype = mimetype
+    
+    def set_message(self, message):
+        self.message = message
