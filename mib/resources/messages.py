@@ -1,3 +1,4 @@
+from posix import posix_spawn
 from flask import request, jsonify
 from sqlalchemy.orm.base import NEVER_SET
 from mib.dao.message_manager import MessageManager
@@ -102,39 +103,30 @@ def draft_message():
     """This method allows the creation of a new drafted message.
     """
     post_data = request.get_json()
+    payload = json.loads(post_data['payload'])
+    
     list_of_images = request.files
     sender = post_data.get('sender')
+    image_id_to_delete = post_data.get('delete_image_ids')
+    user_id_to_delete = post_data.get('delete_user_ids')
 
-    try: 
-        # Get images previously uploaded that needs to be deleted
-        image_id_to_delete = post_data.get('delete_image_ids')
-    except KeyError:
-        image_id_to_delete = []
-    try:
-        # Get users previously uploaded that needs to be deleted
-        user_id_to_delete = post_data.get('delete_user_ids')
-    except KeyError:
-        user_id_to_delete = []
-
-    list_of_receiver = post_data.get('receivers')
+    list_of_receiver = set(payload["destinator"])
     # allowing draft with at least one destinator specified
     if len(list_of_receiver) == 0:
         return jsonify({
             'message': 'Draft with no recipients'
         }), 400
 
-    date_of_delivery = post_data.get('date_of_delivery')
-    time_of_delivery = post_data.get('time_of_delivery')
-    content = post_data.get('content')
-    title = post_data.get('title')
-    font = post_data.get('font')
+    date_of_delivery = payload["date_of_delivery"]
+    time_of_delivery = payload["time_of_delivery"]
+    content = payload["content"]
+    title = payload["title"]
+    font = payload["font"]
 
     if font == "":
         font = "Times New Roman"
-    try: 
-        msg_id = post_data.get('message_id')
-    except KeyError:
-        msg_id = 0
+        
+    msg_id =  post_data.get('message_id')
     
     if msg_id != 0:
         # this message was already drafted, need to update it
@@ -195,9 +187,8 @@ def draft_message():
         ImageManager.add_image(image)
 
     response_object = {
-        'message': message.serialize(),
         'status': 'success',
-        'message': 'Successfully draft creation'
+        'message': 'message.serialize()'
     }
 
     return jsonify(response_object), 201

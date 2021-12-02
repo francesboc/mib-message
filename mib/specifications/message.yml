@@ -217,7 +217,7 @@ components:
           type: boolean
           description: Describe is the message is finish or not
           example: True
-        receivers:
+        destinator:
           type: array
           items:
             type: integer
