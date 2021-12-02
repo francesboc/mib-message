@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from sqlalchemy.orm.base import NEVER_SET
+from sqlalchemy.sql.expression import null
 from mib.dao.message_manager import MessageManager
 from mib.dao.image_manager import ImageManager
 from mib.dao.msglist_manager import MsglistManager
@@ -99,7 +100,16 @@ def get_messages_sent():
 
 def get_messages_drafted(sender_id):
     return 
+def get_message_by_id(message_id):
+    message = MessageManager.get_msg_by_id(message_id)
+    result=''
+    print(message)
+    if message!=None:
+        result = message.serialize()
 
+    return jsonify(result),200
+def delete_message_by_id(message_id):
+    return MessageManager.delete_message_by_id(message_id)
 def draft_message():
     """This method allows the creation of a new drafted message.
     """
