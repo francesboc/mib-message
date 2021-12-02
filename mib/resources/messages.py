@@ -101,6 +101,7 @@ def get_messages_sent():
 
 def get_messages_drafted(sender_id):
     return 
+
 def get_message_by_id(message_id):
     message = MessageManager.get_msg_by_id(message_id)
     result=''
@@ -109,8 +110,10 @@ def get_message_by_id(message_id):
         result = message.serialize()
 
     return jsonify(result),200
+
 def delete_message_by_id(message_id):
     return MessageManager.delete_message_by_id(message_id)
+
 def draft_message():
     """This method allows the creation of a new drafted message.
     """
@@ -200,7 +203,7 @@ def draft_message():
 
     response_object = {
         'status': 'success',
-        'message': 'message.serialize()'
+        'message': message.serialize()
     }
 
     return jsonify(response_object), 201
