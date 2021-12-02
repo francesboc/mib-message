@@ -126,6 +126,44 @@ paths:
           description: Created
         default:
           description: Error during message sending
+  /message/{message_id}:
+    get:
+      summary: Get a specific message by id
+      tags: [ Message ]
+      description: Get the list of sent and drafted messages
+      operationId: mib.resources.messages.get_message_by_id
+      parameters:
+        - name: message_id
+          description: Message unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Return the message 
+        default:
+          description: An error occured during retrieving the message list
+    delete:
+      summary: Delete a specific message by id
+      tags: [ Message ]
+      description: Delete the message with the specify id
+      operationId: mib.resources.messages.delete_message_by_id
+      parameters:
+        - name: message_id
+          description: Message unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Message as been delete
+        default:
+          description: An error occured during delete the message
+    
 components:
   schemas:
     Message:

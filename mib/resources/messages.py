@@ -1,6 +1,7 @@
 from posix import posix_spawn
 from flask import request, jsonify
 from sqlalchemy.orm.base import NEVER_SET
+from sqlalchemy.sql.expression import null
 from mib.dao.message_manager import MessageManager
 from mib.dao.image_manager import ImageManager
 from mib.dao.msglist_manager import MsglistManager
@@ -37,7 +38,6 @@ def verif_data(data):
 def merge_date_time(date,time):
     new_date = date +" "+time
     new_date = datetime.strptime(new_date,'%Y-%m-%d %H:%M')
-    
     return new_date
 
 def API_call(content):
@@ -63,7 +63,7 @@ def send():
         message.set_content(get_data["content"])
         message.set_font(get_data["font"])
         message.set_sender(get_data["sender"])
-        message.set_delivery_date = merge_date_time(get_data['date_of_delivery'],get_data['time_of_delivery'])
+        message.set_delivery_date( merge_date_time(get_data['date_of_delivery'],get_data['time_of_delivery']) )
         message.set_draft(False)
 
         result = API_call(get_data['content']) # Check for bad content
@@ -90,15 +90,27 @@ def send():
     return jsonify(response_object), 201
 
 
-def get_messages_received():
-    return 
+def get_messages_received(receiver_id):
+    list_messages = MessageManager.get_all_new(receiver_id)
+    result = [msg.serialize() for msg in list_messages]
+
+    return jsonify({ "msg_list": result}), 200
 
 def get_messages_sent():
     return
 
 def get_messages_drafted(sender_id):
     return 
+def get_message_by_id(message_id):
+    message = MessageManager.get_msg_by_id(message_id)
+    result=''
+    print(message)
+    if message!=None:
+        result = message.serialize()
 
+    return jsonify(result),200
+def delete_message_by_id(message_id):
+    return MessageManager.delete_message_by_id(message_id)
 def draft_message():
     """This method allows the creation of a new drafted message.
     """
