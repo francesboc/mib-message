@@ -295,3 +295,9 @@ components:
             type: string
           description: List of images
           example: []
+        mimetypes:
+          type: array
+          items:
+            type: string
+          description: List of mimetypes
+          example: []

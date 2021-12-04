@@ -3,13 +3,13 @@ from sqlalchemy.orm import relationship
 from mib import db
 
 
-msglist = db.Table('msglist',
-    db.Column('msg_id', db.Integer, db.ForeignKey('Message.id'), primary_key=True),
-    db.Column('user_id', db.Integer, primary_key=True),
-    db.Column('read',db.Boolean, default=False),
-    db.Column('notified',db.Boolean, default=False),
-    db.Column('hasReported', db.Boolean, default=False) #this is to know if a user has already reported a specific message
-)
+#msglist = db.Table('msglist',
+#    db.Column('msg_id', db.Integer, db.ForeignKey('Message.id'), primary_key=True),
+#    db.Column('user_id', db.Integer, primary_key=True),
+#    db.Column('read',db.Boolean, default=False),
+#    db.Column('notified',db.Boolean, default=False),
+#    db.Column('hasReported', db.Boolean, default=False) #this is to know if a user has already reported a specific message
+#)
 
 class Message(db.Model):
     """Representation of User model."""
@@ -29,9 +29,7 @@ class Message(db.Model):
     images = relationship("Image", cascade="all,delete", backref="Message")
     font = db.Column(db.Unicode(128), default = "Times New Roman") 
     is_draft = db.Column(db.Boolean, default=False)
-    receivers = relationship('Message', secondary=msglist,
-        primaryjoin=id==msglist.c.msg_id,
-        backref="msg_id")
+    receivers = relationship('Msglist', cascade="all,delete", backref="Message")
     
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
@@ -58,6 +56,41 @@ class Message(db.Model):
         return self.id
     
     def serialize(self):
+        serialized =  dict([(k,self.__getattribute__(k)) for k in self.SERIALIZE_LIST])
+        serialized['receivers'] = [ k.receiver_id for k in self.receivers]
+        return serialized
+
+class Msglist(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    message_id = db.Column(db.Integer, db.ForeignKey('Message.id')) # msg in witch the image is
+    receiver_id = db.Column(db.Integer, nullable=False)
+    read = db.Column(db.Boolean, default=False)
+    notified = db.Column(db.Boolean, default=False)
+    hasReported = db.Column(db.Boolean, default=False) #this is to know if a user has already reported a specific message
+
+    # A list of fields to be serialized
+    SERIALIZE_LIST = ['id', 'message_id', 'receiver_id', 'read', 'notified', 'hasReported']
+
+    def get_id(self):
+        return self.id
+    
+    def set_message_id(self, id):
+        self.message_id = id 
+
+    def set_receiver_id(self, id):
+        self.receiver_id = id
+    
+    def set_read(self, read):
+        self.read = read
+
+    def set_notified(self, notified):
+        self.notified = notified
+
+    def set_has_reported(self, report):
+        self.hasReported = report
+
+    def serialize(self):
         return dict([(k,self.__getattribute__(k)) for k in self.SERIALIZE_LIST])
 
 class Image(db.Model):
@@ -83,10 +116,4 @@ class Image(db.Model):
         self.message = message
 
     def serialize(self):
-        serialized_dict = []
-        for k in self.SERIALIZE_LIST:
-            if k == 'image':
-                serialized_dict.append((k,str(self.__getattribute__(k)).encode('base64')))
-            else:
-                serialized_dict.append((k,str(self.__getattribute__(k))))
-        return serialized_dict
+        return dict([(k,self.__getattribute__(k)) for k in self.SERIALIZE_LIST])

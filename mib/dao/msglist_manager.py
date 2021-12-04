@@ -1,7 +1,6 @@
-from sqlalchemy.sql.functions import user
 from mib.dao.manager import Manager
-from mib.models.message import msglist
-from sqlalchemy import insert
+from mib.models.message import Msglist
+from sqlalchemy import insert, update,delete
 from mib import db # maybe not needed
 
 class MsglistManager(Manager):
@@ -9,31 +8,30 @@ class MsglistManager(Manager):
     @staticmethod
     def add_receivers(message_id: str, list_of_receivers: list):
         for receiver_id in list_of_receivers:
-            stmt = (
-                insert(msglist).
-                values(msg_id=message_id, user_id=receiver_id)
-            )
-            db.session.execute(stmt)
-        db.session.commit()
+            msglist = Msglist()
+            msglist.set_message_id(message_id)
+            msglist.set_receiver_id(receiver_id)
+            Manager.create(msglist=msglist)
 
     @staticmethod
     def get_receivers(message_id: str):
-        receivers_list =  db.session.query(msglist.c.user_id).filter(msglist.c.msg_id==message_id).all()
-        receivers_ids = []
-        for i in range(0,len(receivers_list)):
-            receivers_ids.append(receivers_list[i][0])
-        return receivers_ids
+        _receivers = Msglist.query.filter(Msglist.message_id == message_id).all()
+        return [ k.receiver_id for k in _receivers ]
 
     @staticmethod
     def update_receivers(message_id: str, user_id_to_delete: list, list_of_receivers: list):
         # delete receivers
         for id in user_id_to_delete:
-            db.session.query(msglist).filter(msglist.c.msg_id == message_id).filter(msglist.c.user_id == id).delete()
+            Msglist.query.filter(Msglist.message_id==message_id).filter(Msglist.receiver_id==id).delete()
         # add new receivers
         for receiver_id in list_of_receivers:
-            stmt = (
-                insert(msglist).
-                values(msg_id=message_id, user_id=receiver_id)
-            )
-            db.session.execute(stmt)
+            # check if already exist
+            msglist = Msglist()
+            msglist.set_message_id(message_id)
+            msglist.set_receiver_id(receiver_id)
+            Manager.create(msglist=msglist)
         db.session.commit()
+
+    @staticmethod
+    def get_messages_by_receiver_id(receiver_id: int):
+        return Msglist.query.filter(Msglist.receiver_id==receiver_id).all()

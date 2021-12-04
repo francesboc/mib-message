@@ -1,12 +1,11 @@
-from posix import posix_spawn
 from flask import request, jsonify
-from sqlalchemy.orm.base import NEVER_SET
-from sqlalchemy.sql.expression import null
 from mib.dao.message_manager import MessageManager
 from mib.dao.image_manager import ImageManager
 from mib.dao.msglist_manager import MsglistManager
-from mib.models.message import Message, Image
+from mib.models.message import Message, Image, Msglist
 from datetime import datetime
+from dateutil.parser import parse
+import base64
 import json
 
 def get_all_messages(sender_id):
@@ -90,7 +89,7 @@ def send():
 
 
 def get_messages_received(receiver_id):
-    list_messages = MessageManager.get_all_new(receiver_id)
+    list_messages = Msglist.get_messages_by_receiver_id(receiver_id)
     result = [msg.serialize() for msg in list_messages]
 
     return jsonify({ "msg_list": result}), 200
@@ -121,6 +120,8 @@ def draft_message():
     payload = post_data['payload']
     
     list_of_images = post_data.get('raw_images')
+    list_of_mimetypes = post_data.get('mimetypes')
+
     sender = post_data.get('sender')
     image_id_to_delete = post_data.get('delete_image_ids')
     user_id_to_delete = post_data.get('delete_user_ids')
@@ -151,22 +152,25 @@ def draft_message():
         
         new_date = date_of_delivery +" "+time_of_delivery
         try:
-            new_date = datetime.strptime(new_date,'%Y-%m-%d %H:%M')
+            new_date = parse(new_date)
         except ValueError:
             new_date = datetime.now().strftime('%Y-%m-%d') + " " + datetime.now().strftime('%H:%M')
             new_date = datetime.strptime(new_date,'%Y-%m-%d %H:%M')
         
         for image_id in image_id_to_delete:
             image = ImageManager.retrieve_by_id(image_id)
-            ImageManager.delete(image)
+            if image is not None:
+                ImageManager.delete(image)
 
-        for image in list_of_images:
+        for image, mimetype in zip(list_of_images,list_of_mimetypes):
             # adding new images
+            base64_img_bytes = image.encode('utf-8')
+            decoded_image_data = base64.decodebytes(base64_img_bytes)
             img = Image()
-            img.set_image(list_of_images[image].read())
-            img.set_mimetype(list_of_images[image].mimetype)
+            img.set_image(decoded_image_data)
+            img.set_mimetype(mimetype)
             img.set_message(msg_id)
-            ImageManager.add_image(image)
+            ImageManager.add_image(img)
 
         MessageManager.update_draft(msg_id, title, content, new_date, font)
 
@@ -185,7 +189,8 @@ def draft_message():
     message.set_sender(sender)
     new_date = date_of_delivery +" "+time_of_delivery
     try:
-        message.set_delivery_date(datetime.strptime(new_date,'%Y-%m-%d %H:%M'))
+        new_date = parse(new_date)
+        message.set_delivery_date(new_date)
     except ValueError:
         new_date = datetime.now().strftime('%Y-%m-%d') + " " + datetime.now().strftime('%H:%M')
         message.set_delivery_date(datetime.strptime(new_date,'%Y-%m-%d %H:%M'))
@@ -193,20 +198,20 @@ def draft_message():
 
     MessageManager.create_message(message)
     MsglistManager.add_receivers(message.get_id(), list_of_receiver)
-    receivers_list = MsglistManager.get_receivers(message.get_id())
 
-    for image in list_of_images:
+    for image, mimetype in zip(list_of_images,list_of_mimetypes):
+        base64_img_bytes = image.encode('utf-8')
+        decoded_image_data = base64.decodebytes(base64_img_bytes)
         img = Image()
-        img.set_image(list_of_images[image].read())
-        img.set_mimetype(list_of_images[image].mimetype)
+        img.set_image(decoded_image_data)
+        img.set_mimetype(mimetype)
         img.set_message(message.get_id())
-        ImageManager.add_image(image)
+        ImageManager.add_image(img)
 
     response_object = {
         'status': 'success',
         'message': message.serialize()
     }
-    response_object['message']['receivers'] = receivers_list
     return jsonify(response_object), 201
 
 def retrieve_message_images(message_id):
@@ -217,5 +222,5 @@ def retrieve_message_images(message_id):
     _images = ImageManager.get_message_images(message_id)
     response_object = {}
     for image in _images:
-        response_object.update(image.serialize())
+        response_object[image.id] = image.serialize()
     return jsonify(response_object),200
