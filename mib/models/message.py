@@ -1,6 +1,7 @@
 from re import S
 from sqlalchemy.orm import relationship
 from mib import db
+import base64
 
 
 #msglist = db.Table('msglist',
@@ -101,7 +102,7 @@ class Image(db.Model):
     mimetype = db.Column(db.Text, nullable=False)
 
     # A list of fields to be serialized
-    SERIALIZE_LIST = ['id', 'image', 'message', 'mimetype']
+    SERIALIZE_LIST = ['id', 'message', 'mimetype']
 
     def __init__(self, *args, **kw):
         super(Image, self).__init__(*args, **kw)
@@ -116,4 +117,11 @@ class Image(db.Model):
         self.message = message
 
     def serialize(self):
-        return dict([(k,self.__getattribute__(k)) for k in self.SERIALIZE_LIST])
+        serialized =  dict([(k,self.__getattribute__(k)) for k in self.SERIALIZE_LIST])
+        image = self.__getattribute__('image')
+        # encoding image
+        base64_encoded_data = base64.b64encode(image)
+        base64_image = base64_encoded_data.decode('utf-8')
+        serialized['image'] = base64_image
+
+        return serialized

@@ -102,13 +102,12 @@ def get_messages_drafted(sender_id):
 
 def get_message_by_id(message_id):
     message = MessageManager.retrieve_by_id(message_id)
-    receivers_list = MsglistManager.get_receivers(message_id)
-    result = {}
-    if message!=None:
-        result = message.serialize()
-    result["receivers"] = receivers_list
+    if message is not None:
+        return jsonify(message.serialize()), 200
 
-    return jsonify(result),200
+    return jsonify({
+            'message': 'Message not found'
+        }), 404
 
 def delete_message_by_id(message_id):
     return MessageManager.delete_message_by_id(message_id)
