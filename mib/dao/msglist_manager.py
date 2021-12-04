@@ -17,6 +17,14 @@ class MsglistManager(Manager):
         db.session.commit()
 
     @staticmethod
+    def get_receivers(message_id: str):
+        receivers_list =  db.session.query(msglist.c.user_id).filter(msglist.c.msg_id==message_id).all()
+        receivers_ids = []
+        for i in range(0,len(receivers_list)):
+            receivers_ids.append(receivers_list[i][0])
+        return receivers_ids
+
+    @staticmethod
     def update_receivers(message_id: str, user_id_to_delete: list, list_of_receivers: list):
         # delete receivers
         for id in user_id_to_delete:

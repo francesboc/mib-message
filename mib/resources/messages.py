@@ -9,7 +9,6 @@ from mib.models.message import Message, Image
 from datetime import datetime
 import json
 
-import json
 def get_all_messages(sender_id):
     """Get the list of sent and drafted messages
     """
@@ -103,11 +102,12 @@ def get_messages_drafted(sender_id):
     return 
 
 def get_message_by_id(message_id):
-    message = MessageManager.get_msg_by_id(message_id)
-    result=''
-    print(message)
+    message = MessageManager.retrieve_by_id(message_id)
+    receivers_list = MsglistManager.get_receivers(message_id)
+    result = {}
     if message!=None:
         result = message.serialize()
+    result["receivers"] = receivers_list
 
     return jsonify(result),200
 
@@ -118,14 +118,14 @@ def draft_message():
     """This method allows the creation of a new drafted message.
     """
     post_data = request.get_json()
-    payload = json.loads(post_data['payload'])
+    payload = post_data['payload']
     
-    list_of_images = request.files
+    list_of_images = post_data.get('raw_images')
     sender = post_data.get('sender')
     image_id_to_delete = post_data.get('delete_image_ids')
     user_id_to_delete = post_data.get('delete_user_ids')
 
-    list_of_receiver = set(payload["destinator"])
+    list_of_receiver = payload["destinator"]
     # allowing draft with at least one destinator specified
     if len(list_of_receiver) == 0:
         return jsonify({
@@ -193,6 +193,7 @@ def draft_message():
 
     MessageManager.create_message(message)
     MsglistManager.add_receivers(message.get_id(), list_of_receiver)
+    receivers_list = MsglistManager.get_receivers(message.get_id())
 
     for image in list_of_images:
         img = Image()
@@ -205,5 +206,16 @@ def draft_message():
         'status': 'success',
         'message': message.serialize()
     }
-
+    response_object['message']['receivers'] = receivers_list
     return jsonify(response_object), 201
+
+def retrieve_message_images(message_id):
+    """
+    This method allows the retrival of images
+    associated to a message
+    """
+    _images = ImageManager.get_message_images(message_id)
+    response_object = {}
+    for image in _images:
+        response_object.update(image.serialize())
+    return jsonify(response_object),200

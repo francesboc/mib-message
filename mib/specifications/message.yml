@@ -161,9 +161,30 @@ paths:
       responses:
         200:
           description: Message as been delete
+        404:
+          description: Message not found
         default:
           description: An error occured during delete the message
-    
+  /message/{message_id}/images:
+    get:
+      summary: Get the list of images associated to the message
+      tags:
+        - Images
+      description: Get the list of images in the message
+      operationId: mib.resources.messages.retrieve_message_images
+      parameters:
+        - name: message_id
+          description: Message unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Return list of images
+        default:
+          description: An error occured during retrieving the message list
 components:
   schemas:
     Message:
@@ -219,45 +240,58 @@ components:
         - sender
       type: object
       properties:
+        payload:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Message title
+              example: 'New Message to you'
+            content:
+              type: string
+              description: Text of the message
+              example: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC'
+            date_of_delivery:
+              type: string
+              description: Date when the message will be sent
+              example: '12-01-2022'
+            time_of_delivery:
+              type: string
+              description: Time when the message will be sent
+              example: '10:21'
+            font:
+              type: string
+              description: Description of the font of the message
+              example: 'Arial'
+            destinator:
+              type: array
+              items:
+                type: integer
+              description: List of users who will receive the message
+              example: [2,1]
         sender:
           type: integer
           description: Id of the message's sender
           example: 1
-        date_of_delivery:
-          type: string
-          description: Date when the message will be sent
-          example: '12/01/2022'
-        time_of_delivery:
-          type: string
-          description: Time when the message will be sent
-          example: '10:21'
-        content:
-          type: string
-          description: Text of the message
-          example: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC'
-        title:
-          type: string
-          description: Message title
-          example: 'New Message to you'
-        bad_content:
-          type: boolean
-          description: Detect bad content in the message
-          example: False
-        number_bad:
+        message_id:
           type: integer
-          description: Number of bad word in the message
+          description: Id of the message
           example: 0
-        font:
-          type: string
-          description: Description of the font of the message
-          example: 'Arial'
-        is_draft:
-          type: boolean
-          description: Describe is the message is finish or not
-          example: True
-        destinator:
+        delete_image_ids:
           type: array
           items:
             type: integer
           description: List of users who will receive the message
-          example: [2,1]
+          example: []
+        delete_user_ids:
+          type: array
+          items:
+            type: integer
+          description: List of users who will receive the message
+          example: []
+        raw_images:
+          type: array
+          items:
+            type: string
+          description: List of images
+          example: []

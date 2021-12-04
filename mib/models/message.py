@@ -1,3 +1,4 @@
+from re import S
 from sqlalchemy.orm import relationship
 from mib import db
 
@@ -30,8 +31,7 @@ class Message(db.Model):
     is_draft = db.Column(db.Boolean, default=False)
     receivers = relationship('Message', secondary=msglist,
         primaryjoin=id==msglist.c.msg_id,
-        backref="msg_id",
-        lazy="dynamic")
+        backref="msg_id")
     
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
@@ -67,6 +67,9 @@ class Image(db.Model):
     message = db.Column(db.Integer, db.ForeignKey('Message.id')) # msg in witch the image is
     mimetype = db.Column(db.Text, nullable=False)
 
+    # A list of fields to be serialized
+    SERIALIZE_LIST = ['id', 'image', 'message', 'mimetype']
+
     def __init__(self, *args, **kw):
         super(Image, self).__init__(*args, **kw)
     
@@ -78,3 +81,12 @@ class Image(db.Model):
     
     def set_message(self, message):
         self.message = message
+
+    def serialize(self):
+        serialized_dict = []
+        for k in self.SERIALIZE_LIST:
+            if k == 'image':
+                serialized_dict.append((k,str(self.__getattribute__(k)).encode('base64')))
+            else:
+                serialized_dict.append((k,str(self.__getattribute__(k))))
+        return serialized_dict

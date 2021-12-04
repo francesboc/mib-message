@@ -18,3 +18,7 @@ class ImageManager(Manager):
     @staticmethod
     def delete(image: Image):
         Manager.delete(image=image)
+
+    @staticmethod
+    def get_message_images(message_id):
+        return Image.query.filter(Image.message==message_id).all()
