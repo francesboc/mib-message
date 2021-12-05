@@ -63,6 +63,8 @@ class Message(db.Model):
 
 class Msglist(db.Model):
 
+    __tablename__ = 'Msglist'
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     message_id = db.Column(db.Integer, db.ForeignKey('Message.id')) # msg in witch the image is
     receiver_id = db.Column(db.Integer, nullable=False)
@@ -95,6 +97,8 @@ class Msglist(db.Model):
         return dict([(k,self.__getattribute__(k)) for k in self.SERIALIZE_LIST])
 
 class Image(db.Model):
+
+    __tablename__ = 'Image'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     image = db.Column(db.LargeBinary, nullable=False) # data of the image
