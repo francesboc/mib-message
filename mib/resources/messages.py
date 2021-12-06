@@ -115,9 +115,10 @@ def delete_message_by_id(message_id):
 def draft_message():
     """This method allows the creation of a new drafted message.
     """
+    #post_data = json.loads(request.form["payload"])
     post_data = request.get_json()
     payload = post_data['payload']
-    
+   # 
     list_of_images = post_data.get('raw_images')
     list_of_mimetypes = post_data.get('mimetypes')
 
