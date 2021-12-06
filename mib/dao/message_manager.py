@@ -18,18 +18,18 @@ class MessageManager(Manager):
 
     @staticmethod
     def retrieve_sent_by_id(sender_id):
-       return Message.query.filter(Message.id == sender_id).filter(Message.is_draft == False).all()
+       return Message.query.filter(Message.sender == sender_id).filter(Message.is_draft == False).all()
 
     @staticmethod
     def retrieve_drafted_by_id(sender_id):
-        return Message.query.filter(Message.id == sender_id).filter(Message.is_draft == True).all()
+        return Message.query.filter(Message.sender == sender_id).filter(Message.is_draft == True).all()
     
     @staticmethod
-    def update_draft(msg_id, title, content, new_date, font):
+    def update_msg(msg_id, title, content, new_date, font, isDraft):
         stmt = (
             update(Message).
             where(Message.id==int(msg_id)).
-            values(title=title, content=content,date_of_delivery=new_date,font=font)
+            values(title=title, content=content,date_of_delivery=new_date,font=font,is_draft=isDraft)
         )
         
         db.session.execute(stmt)

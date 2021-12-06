@@ -25,11 +25,12 @@ class MsglistManager(Manager):
             Msglist.query.filter(Msglist.message_id==message_id).filter(Msglist.receiver_id==id).delete()
         # add new receivers
         for receiver_id in list_of_receivers:
-            # check if already exist
-            msglist = Msglist()
-            msglist.set_message_id(message_id)
-            msglist.set_receiver_id(receiver_id)
-            Manager.create(msglist=msglist)
+            check = Msglist.query.filter(Msglist.message_id==message_id).filter(Msglist.receiver_id==receiver_id).first()
+            if check is None:
+                msglist = Msglist()
+                msglist.set_message_id(message_id)
+                msglist.set_receiver_id(receiver_id)
+                Manager.create(msglist=msglist)
         db.session.commit()
 
     @staticmethod

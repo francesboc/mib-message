@@ -98,7 +98,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Draft'
+              $ref: '#/components/schemas/Message'
       responses:
         '200':
           description: Drafted message modified
@@ -108,7 +108,7 @@ paths:
           description: Wrong draft creation request
         default:
           description: An error occured during retrieving the message list
-  /message:
+  /message/send:
     post:
       summary: Send a message
       tags:
@@ -120,7 +120,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Message'     
+              $ref: '#/components/schemas/Message'    
       responses:
         201:
           description: Created
@@ -188,54 +188,6 @@ paths:
 components:
   schemas:
     Message:
-      required:
-        - sender
-        - content
-      type: object
-      properties:
-        sender:
-          type: integer
-          description: Id of the message's sender
-          example: 1
-        date_of_delivery:
-          type: string
-          description: Date when the message will be sent
-          example: '2022-01-01'
-        time_of_delivery:
-          type: string
-          description: Time when the message will be sent
-          example: '10:21'
-        content:
-          type: string
-          description: Text of the message
-          example: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC'
-        title:
-          type: string
-          description: Message title
-          example: 'New Message to you'
-        bad_content:
-          type: boolean
-          description: Customer phone number
-          example: False
-        number_bad:
-          type: integer
-          description: Number of bad word in the message
-          example: 0
-        font:
-          type: string
-          description: Description of the font of the message
-          example: 'Arial'
-        is_draft:
-          type: boolean
-          description: Describe is the message is finish or not
-          example: False
-        receivers:
-          type: array
-          items:
-            type: integer
-          description: List of users who will receive the message
-          example: [2,1]
-    Draft:
       required:
         - sender
       type: object

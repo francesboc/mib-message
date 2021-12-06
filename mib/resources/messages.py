@@ -24,7 +24,7 @@ def get_all_messages(sender_id):
 
 # Check if the message data are correct
 def verif_data(data):
-    if len(data["receivers"])>=1: # At least one receiver
+    if len(data["destinator"])>=1: # At least one receiver
         if data["date_of_delivery"] != "" and data["time_of_delivery"] != "": #check the oresence of delivery date and time
             delivery=merge_date_time(data['date_of_delivery'],data['time_of_delivery'])
             if delivery>datetime.today(): #check that delivery date is in future
@@ -53,39 +53,129 @@ def API_call(content):
     return json.loads(response.read().decode("utf-8"))
     
 def send():
-    get_data = request.get_json()
-    r = verif_data(get_data) #check on date of delivery
+    post_data = request.get_json()
+    payload = post_data['payload']
+    r = verif_data(payload) #check on date of delivery
     if r=="OK":
-        message = Message()
-        message.set_title(get_data["title"])
-        message.set_content(get_data["content"])
-        message.set_font(get_data["font"])
-        message.set_sender(get_data["sender"])
-        message.set_delivery_date( merge_date_time(get_data['date_of_delivery'],get_data['time_of_delivery']) )
-        message.set_draft(False)
+        #get the values from form fields
+        list_of_receiver = payload["destinator"]
+        date_of_delivery = payload["date_of_delivery"]
+        time_of_delivery = payload["time_of_delivery"]
+        content = payload["content"]
+        # Check if fields are valid before send the message
+        title = payload["title"]
+        if title == "":
+            return jsonify({
+                'message': 'Message with empty title'
+            }), 400
 
-        result = API_call(get_data['content']) # Check for bad content
+        list_of_images = post_data.get('raw_images')
+        list_of_mimetypes = post_data.get('mimetypes')
+        sender = post_data.get('sender')
+        font = payload["font"]
+        if font == "":
+            font = "Times New Roman"
+        if content != "":
+            try:
+                result = API_call(content)
+            except Exception:
+                return jsonify({
+                    'message': 'Error with NeutrinoApi'
+                }), 400
+        else:
+            result= {'is-bad': False}
+
+        # Check if message was drafted and then sended
+        try: 
+            msg_id =  post_data.get('message_id')
+        except KeyError:
+            msg_id = 0
+
+        if msg_id != 0:
+            # message was drafted and then sent
+            image_id_to_delete = post_data.get('delete_image_ids')
+            user_id_to_delete = post_data.get('delete_user_ids')
+
+            _message = MessageManager.retrieve_by_id(msg_id)
+            MsglistManager.update_receivers(msg_id, user_id_to_delete, list_of_receiver)
+            
+            new_date = date_of_delivery +" "+time_of_delivery
+            try:
+                new_date = parse(new_date)
+            except ValueError:
+                new_date = datetime.now().strftime('%Y-%m-%d') + " " + datetime.now().strftime('%H:%M')
+                new_date = datetime.strptime(new_date,'%Y-%m-%d %H:%M')
+            print(image_id_to_delete)
+            for image_id in image_id_to_delete:
+                image = ImageManager.retrieve_by_id(image_id)
+                print(image)
+                if image is not None:
+                    ImageManager.delete(image)
+
+            for image, mimetype in zip(list_of_images,list_of_mimetypes):
+                # adding new images
+                base64_img_bytes = image.encode('utf-8')
+                decoded_image_data = base64.decodebytes(base64_img_bytes)
+                img = Image()
+                img.set_image(decoded_image_data)
+                img.set_mimetype(mimetype)
+                img.set_message(msg_id)
+                ImageManager.add_image(img)
+
+            MessageManager.update_msg(msg_id, title, content, new_date, font, False)
+
+            response_object = {
+                'message_obj': _message.serialize(),
+                'status': 'success',
+                'message': 'Successfully draft creation'
+            }
+            return jsonify(response_object), 200
+
+        #Creating new Message
+        message = Message()
+        message.set_title(title)
+        message.set_content(content)
+        message.set_font(font)
+        message.set_sender(sender)
+        new_date = date_of_delivery +" "+time_of_delivery
+        try:
+            new_date = parse(new_date)
+            message.set_delivery_date(new_date)
+        except ValueError:
+            new_date = datetime.now().strftime('%Y-%m-%d') + " " + datetime.now().strftime('%H:%M')
+            message.set_delivery_date(datetime.strptime(new_date,'%Y-%m-%d %H:%M'))
+        message.set_draft(False)
+        
+        #Setting the message (bad content filter) in database
         if(result['is-bad']==True):
-            message.bad_content=True
+            message.set_bad_content=True
             message.number_bad = len(result["bad-words-list"])
         else:
             message.bad_content=False
             message.number_bad = 0
+        
+        #add message
         MessageManager.create_message(message)
-        MsglistManager.add_receivers(message.get_id(), get_data['receivers'])
-        list_of_images = request.files
-        for image in list_of_images:
+        MsglistManager.add_receivers(message.get_id(), list_of_receiver)
+
+        for image, mimetype in zip(list_of_images,list_of_mimetypes):
+            base64_img_bytes = image.encode('utf-8')
+            decoded_image_data = base64.decodebytes(base64_img_bytes)
             img = Image()
-            img.set_image(list_of_images[image].read())
-            img.set_mimetype(list_of_images[image].mimetype)
+            img.set_image(decoded_image_data)
+            img.set_mimetype(mimetype)
             img.set_message(message.get_id())
-            ImageManager.add_image(image)
-        
-        
-    response_object = {
-        'status': r,
-        'message': r, }
-    return jsonify(response_object), 201
+            ImageManager.add_image(img)
+
+        response_object = {
+            'status': 'success',
+            'message': message.serialize()
+        }
+        return jsonify(response_object), 201
+    else:
+        return jsonify({
+                'message': 'Invalid message: '+r
+            }), 400
 
 
 def get_messages_received(receiver_id):
@@ -115,10 +205,9 @@ def delete_message_by_id(message_id):
 def draft_message():
     """This method allows the creation of a new drafted message.
     """
-    #post_data = json.loads(request.form["payload"])
     post_data = request.get_json()
     payload = post_data['payload']
-   # 
+
     list_of_images = post_data.get('raw_images')
     list_of_mimetypes = post_data.get('mimetypes')
 
@@ -172,7 +261,7 @@ def draft_message():
             img.set_message(msg_id)
             ImageManager.add_image(img)
 
-        MessageManager.update_draft(msg_id, title, content, new_date, font)
+        MessageManager.update_msg(msg_id, title, content, new_date, font, True)
 
         response_object = {
             'message_obj': _message.serialize(),
@@ -221,6 +310,8 @@ def retrieve_message_images(message_id):
     """
     _images = ImageManager.get_message_images(message_id)
     response_object = {}
+    i=0
     for image in _images:
-        response_object[image.id] = image.serialize()
+        response_object[str(i)] = image.serialize()
+        i=i+1
     return jsonify(response_object),200
