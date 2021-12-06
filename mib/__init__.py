@@ -75,7 +75,7 @@ def create_app():
     if flask_env == 'testing':
         # we need to populate the db
         db.create_all()
-    #db.create_all()
+    db.create_all()
     # registering to api app all specifications
     register_specifications(api_app)
 
