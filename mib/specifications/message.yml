@@ -108,6 +108,28 @@ paths:
           description: Wrong draft creation request
         default:
           description: An error occured during retrieving the message list
+    delete:
+      summary: delete draft
+      tags:
+        - Message
+      description: Create a new drafted message
+      operationId: mib.resources.messages.delete_draft
+      requestBody:
+        description: Draft message
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DraftID'  
+      responses:
+        '200':
+          description: Drafted message modified
+        '201':
+          description: Draft message created
+        '400':
+          description: Wrong draft creation request
+        default:
+          description: An error occured during retrieving the message list
   /message/send:
     post:
       summary: Send a message
@@ -187,6 +209,17 @@ paths:
           description: An error occured during retrieving the message list
 components:
   schemas:
+
+    DraftID:
+      required:
+        - draftid
+      type: object
+      properties:
+        draftid:
+          type: integer
+          description: Id of the message's sender
+          example: 1
+
     Message:
       required:
         - sender

@@ -315,3 +315,30 @@ def retrieve_message_images(message_id):
         response_object[str(i)] = image.serialize()
         i=i+1
     return jsonify(response_object),200
+
+
+def delete_draft():
+         #just delete the draft
+        delete_data = request.get_json()
+        id = delete_data['draftid']
+
+        msg = MessageManager.retrieve_by_id(id)
+        print(msg)
+        if msg is not None:
+            if msg.is_draft==True:
+                MessageManager.delete_message_by_id(id)
+                return jsonify({'content': "Message Deleted"}),200
+            else:
+                return jsonify({'content': "Message is not a draft"}),404
+        else:
+            return jsonify({'content': "Draft not present"}),404
+
+
+#  elif msg_exist.is_draft == True:
+#             #just delete the draft
+#             delete_ = db.session.query(Messages).filter(Messages.id == msg_id).first()
+#             db.session.delete(delete_)
+#             db.session.commit()
+#             return render_template('get_msg_send_draft.html', draft=_draft, send=_send)
+#         else:
+#             return render_template('get_msg_send_draft.html', draft=_draft, send=_send, action = "Something went wrong...")
