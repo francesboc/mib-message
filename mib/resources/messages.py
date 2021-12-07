@@ -178,11 +178,23 @@ def send():
             }), 400
 
 
-def get_messages_received(receiver_id):
-    list_messages = Msglist.get_messages_by_receiver_id(receiver_id)
-    result = [msg.serialize() for msg in list_messages]
+def get_messages_received():
+    post_data = request.get_json()
+    
+    receiver_id = post_data['receiver']
+    date = parse(post_data['date'])
+    filter = post_data['filter']
 
-    return jsonify({ "msg_list": result}), 200
+    msglist = MsglistManager.get_messages_by_receiver_id(receiver_id)
+    messages = []
+    for elem in msglist:
+        message = MessageManager.retrieve_by_id_until_now(elem.message_id,date, filter)
+        if message != None:
+            messages.append(message)
+
+    result = [msg.serialize() for msg in messages]
+
+    return jsonify(result), 200
 
 def get_messages_sent():
     return
@@ -200,7 +212,12 @@ def get_message_by_id(message_id):
         }), 404
 
 def delete_message_by_id(message_id):
-    return MessageManager.delete_message_by_id(message_id)
+    MessageManager.delete_message_by_id(message_id)
+    response = {
+        'status': 'success',
+        'message': 'Successfully deleted',
+    }
+    return jsonify(response), 202
 
 def draft_message():
     """This method allows the creation of a new drafted message.

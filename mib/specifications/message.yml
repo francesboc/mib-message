@@ -25,21 +25,32 @@ paths:
           description: Return list of all messages
         default:
           description: An error occured during retrieving the message list
-  /messages/received/{receiver_id}:
-    get:
-      summary: Retrieve all messages received by receiver ID
+  /messages/received/:
+    post:
+      summary: Retrieve all messages received by a receiver
       tags:
         - Messages
       description: Get the list message of the receiver when the delivery date is pass 
       operationId: mib.resources.messages.get_messages_received
-      parameters:
-        - name: receiver_id
-          description: User unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                receiver: 
+                  type: string
+                  description: Email of the user
+                  example: "1"
+                date:
+                  type: string
+                  description: datetime
+                  example: '2022-01-01 10:00'
+                filter:
+                  type: boolean
+                  description: tells if the filter is active
+                  example: false
       responses:
         '200':
           description: Return list of messages
@@ -239,7 +250,7 @@ components:
             date_of_delivery:
               type: string
               description: Date when the message will be sent
-              example: '12-01-2022'
+              example: '2022-01-01'
             time_of_delivery:
               type: string
               description: Time when the message will be sent

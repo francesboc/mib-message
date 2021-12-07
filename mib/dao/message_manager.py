@@ -15,6 +15,13 @@ class MessageManager(Manager):
     def retrieve_by_id(id_):
         Manager.check_none(id=id_)
         return Message.query.get(id_)
+    
+    @staticmethod
+    def retrieve_by_id_until_now(id, date, filter):
+        Manager.check_none(id=id)
+        return Message.query.filter(Message.id == id) \
+            .filter(Message.date_of_delivery <= date) \
+            .filter(Message.bad_content==filter).first()
 
     @staticmethod
     def retrieve_sent_by_id(sender_id):
@@ -45,8 +52,8 @@ class MessageManager(Manager):
 
     @staticmethod
     def delete_message_by_id(id_: int):
-        user = MessageManager.retrieve_by_id(id_)
-        MessageManager.delete_message(user)    
+        message = MessageManager.retrieve_by_id(id_)
+        MessageManager.delete_message(message)    
 
     #@staticmethod
     #def retrieve_by_email(email):
