@@ -32,7 +32,16 @@ class MsglistManager(Manager):
                 msglist.set_receiver_id(receiver_id)
                 Manager.create(msglist=msglist)
         db.session.commit()
+    
+    @staticmethod
+    def delete_receiver(message_id: int, user_id: int):
+        Msglist.query.filter(Msglist.message_id==message_id).filter(Msglist.receiver_id==user_id).delete()
+        db.session.commit()
 
     @staticmethod
     def get_messages_by_receiver_id(receiver_id: int):
         return Msglist.query.filter(Msglist.receiver_id==receiver_id).all()
+    
+    @staticmethod
+    def get_list_by_id_and_receiver(msg_id, receiver_id):
+        return Msglist.query.filter(Msglist.message_id==msg_id).filter(Msglist.receiver_id==receiver_id).first()

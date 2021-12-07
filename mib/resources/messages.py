@@ -1,3 +1,4 @@
+import re
 from flask import request, jsonify
 from mib.dao.message_manager import MessageManager
 from mib.dao.image_manager import ImageManager
@@ -184,7 +185,6 @@ def get_messages_received():
     receiver_id = post_data['receiver']
     date = parse(post_data['date'])
     filter = post_data['filter']
-
     msglist = MsglistManager.get_messages_by_receiver_id(receiver_id)
     messages = []
     for elem in msglist:
@@ -333,22 +333,14 @@ def retrieve_message_images(message_id):
         i=i+1
     return jsonify(response_object),200
 
+def get_msglist_by_id(msg_id, receiver_id):
+    msglist = MsglistManager.get_list_by_id_and_receiver(msg_id,receiver_id)
+    return jsonify(msglist.serialize()),200
 
-def delete_draft():
-         #just delete the draft
-        delete_data = request.get_json()
-        id = delete_data['draftid']
 
-        msg = MessageManager.retrieve_by_id(id)
-        print(msg)
-        if msg is not None:
-            if msg.is_draft==True:
-                MessageManager.delete_message_by_id(id)
-                return jsonify({'content': "Message Deleted"}),200
-            else:
-                return jsonify({'content': "Message is not a draft"}),404
-        else:
-            return jsonify({'content': "Draft not present"}),404
+def delete_receiver(msg_id, receiver_id):
+    MsglistManager.delete_receiver(msg_id,receiver_id)
+    return jsonify({'message': 'success'}),200
 
 
 #  elif msg_exist.is_draft == True:

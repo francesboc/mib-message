@@ -21,6 +21,7 @@ class MessageManager(Manager):
         Manager.check_none(id=id)
         return Message.query.filter(Message.id == id) \
             .filter(Message.date_of_delivery <= date) \
+            .filter(Message.is_draft==False) \
             .filter(Message.bad_content==filter).first()
 
     @staticmethod

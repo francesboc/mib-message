@@ -56,6 +56,56 @@ paths:
           description: Return list of messages
         default:
           description: An error occured during retrieving the message list
+  /message/list/{msg_id}/{receiver_id}:
+    get:
+      summary: Retrieve the message list of a receiver
+      tags: [ Message List ]
+      operationId: mib.resources.messages.get_msglist_by_id
+      parameters:
+        - name: msg_id
+          description: Message unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: receiver_id
+          description: Receiver unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Return list of all messages
+        default:
+          description: An error occured during retrieving the message list
+    delete:
+      summary: delete a receiver in message list
+      tags:
+        - Message List
+      operationId: mib.resources.messages.delete_receiver
+      parameters:
+        - name: msg_id
+          description: Message unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: receiver_id
+          description: Receiver unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Receiver deleted
+        default:
+          description: An error occured during retrieving the message list
   /messages/send/{sender_id}:
     get:
       summary: Get the list of messages sent by sender ID
@@ -110,28 +160,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Message'
-      responses:
-        '200':
-          description: Drafted message modified
-        '201':
-          description: Draft message created
-        '400':
-          description: Wrong draft creation request
-        default:
-          description: An error occured during retrieving the message list
-    delete:
-      summary: delete draft
-      tags:
-        - Message
-      description: Create a new drafted message
-      operationId: mib.resources.messages.delete_draft
-      requestBody:
-        description: Draft message
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DraftID'  
       responses:
         '200':
           description: Drafted message modified
@@ -220,17 +248,6 @@ paths:
           description: An error occured during retrieving the message list
 components:
   schemas:
-
-    DraftID:
-      required:
-        - draftid
-      type: object
-      properties:
-        draftid:
-          type: integer
-          description: Id of the message's sender
-          example: 1
-
     Message:
       required:
         - sender
