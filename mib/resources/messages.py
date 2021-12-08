@@ -204,11 +204,7 @@ def get_messages_received():
 
     return jsonify(result), 200
 
-def get_messages_sent():
-    return
 
-def get_messages_drafted(sender_id):
-    return 
 
 def get_message_by_id(message_id):
     message = MessageManager.retrieve_by_id(message_id)
@@ -220,13 +216,17 @@ def get_message_by_id(message_id):
         }), 404
 
 def delete_message_by_id(message_id):
-    MessageManager.delete_message_by_id(message_id)
+    try:
+        MessageManager.delete_message_by_id(message_id)
+    except :
+        response = {
+        'status': 'Failed',
+        'message': 'Message not found',}
+        return jsonify(response), 404
     response = {
-        'status': 'success',
-        'message': 'Successfully deleted',
-    }
-    return jsonify(response), 202
-
+        'status': 'Succes',
+        'message': 'Message delete',}
+    return jsonify(response), 200
 def draft_message():
     """This method allows the creation of a new drafted message.
     """

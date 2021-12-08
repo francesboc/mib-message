@@ -106,46 +106,7 @@ paths:
           description: Receiver deleted
         default:
           description: An error occured during retrieving the message list
-  /messages/send/{sender_id}:
-    get:
-      summary: Get the list of messages sent by sender ID
-      tags:
-        - Messages
-      description: Get the list of sent messages
-      operationId: mib.resources.messages.get_messages_sent
-      parameters:
-        - name: sender_id
-          description: User unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Return list of messages
-        default:
-          description: An error occured during retrieving the message list
-  /messages/draft/{sender_id}:
-    get:
-      summary: Get the list of messages drafted by sender ID
-      tags:
-        - Messages
-      description: Get the list of drafted messages
-      operationId: mib.resources.messages.get_messages_drafted
-      parameters:
-        - name: sender_id
-          description: User unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Return list of messages
-        default:
-          description: An error occured during retrieving the message list
+
   /message/draft:
     post:
       summary: Save a draft message
