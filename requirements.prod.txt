@@ -1,3 +1,4 @@
 -r requirements.txt
+flask-mail==0.9.1
 psycopg2
 gunicorn

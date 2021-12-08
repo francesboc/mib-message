@@ -59,4 +59,10 @@ class ProdConfig(DevConfig):
     SQLALCHEMY_DATABASE_URI = 'postgres://%s:%s@%s:%s/%s' % (
         POSTGRES_USER, POSTGRES_PASS, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNMANE = os.getenv('FLASK_MAIL_USERNAME',None)
+    MAIL_USERNMANE = os.getenv('FLASK_MAIL_PASSWORD',None)
+    MAIL_DEFAULT_SENDER = 'flaskapp10@gmail.com'
 

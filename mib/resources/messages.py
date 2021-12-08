@@ -1,3 +1,5 @@
+from operator import pos
+import re
 from flask import request, jsonify
 from mib.dao.message_manager import MessageManager
 from mib.dao.image_manager import ImageManager
@@ -105,10 +107,8 @@ def send():
             except ValueError:
                 new_date = datetime.now().strftime('%Y-%m-%d') + " " + datetime.now().strftime('%H:%M')
                 new_date = datetime.strptime(new_date,'%Y-%m-%d %H:%M')
-            print(image_id_to_delete)
             for image_id in image_id_to_delete:
                 image = ImageManager.retrieve_by_id(image_id)
-                print(image)
                 if image is not None:
                     ImageManager.delete(image)
 
@@ -122,12 +122,21 @@ def send():
                 img.set_message(msg_id)
                 ImageManager.add_image(img)
 
-            MessageManager.update_msg(msg_id, title, content, new_date, font, False)
+            #Setting the message (bad content filter) in database
+            if(result['is-bad']==True):
+                bad_content=True
+                number_bad = len(result["bad-words-list"])
+            else:
+                bad_content=False
+                number_bad = 0
+
+            MessageManager.update_msg(msg_id, title, content, new_date, 
+                font, isDraft=False, bad_content=bad_content, number_bad=number_bad)
 
             response_object = {
                 'message_obj': _message.serialize(),
                 'status': 'success',
-                'message': 'Successfully draft creation'
+                'message': 'Successfully message send'
             }
             return jsonify(response_object), 200
 
@@ -184,7 +193,6 @@ def get_messages_received():
     receiver_id = post_data['receiver']
     date = parse(post_data['date'])
     filter = post_data['filter']
-
     msglist = MsglistManager.get_messages_by_receiver_id(receiver_id)
     messages = []
     for elem in msglist:
@@ -278,7 +286,8 @@ def draft_message():
             img.set_message(msg_id)
             ImageManager.add_image(img)
 
-        MessageManager.update_msg(msg_id, title, content, new_date, font, True)
+        MessageManager.update_msg(msg_id, title, content, new_date, 
+            font, isDraft=True, bad_content=False, number_bad=0)
 
         response_object = {
             'message_obj': _message.serialize(),
@@ -333,22 +342,14 @@ def retrieve_message_images(message_id):
         i=i+1
     return jsonify(response_object),200
 
+def get_msglist_by_id(msg_id, receiver_id):
+    msglist = MsglistManager.get_list_by_id_and_receiver(msg_id,receiver_id)
+    return jsonify(msglist.serialize()),200
 
-def delete_draft():
-         #just delete the draft
-        delete_data = request.get_json()
-        id = delete_data['draftid']
 
-        msg = MessageManager.retrieve_by_id(id)
-        print(msg)
-        if msg is not None:
-            if msg.is_draft==True:
-                MessageManager.delete_message_by_id(id)
-                return jsonify({'content': "Message Deleted"}),200
-            else:
-                return jsonify({'content': "Message is not a draft"}),404
-        else:
-            return jsonify({'content': "Draft not present"}),404
+def delete_receiver(msg_id, receiver_id):
+    MsglistManager.delete_receiver(msg_id,receiver_id)
+    return jsonify({'message': 'success'}),200
 
 
 #  elif msg_exist.is_draft == True:
