@@ -6,6 +6,11 @@ from mib import db # maybe not needed
 class MsglistManager(Manager):
 
     @staticmethod
+    def get_msglist_not_delivered(message_id, read, notified):
+        return Msglist.query.filter(Msglist.message_id==message_id) \
+                .filter(Msglist.read==read).filter(Msglist.notified==notified).all()
+
+    @staticmethod
     def add_receivers(message_id: str, list_of_receivers: list):
         for receiver_id in list_of_receivers:
             msglist = Msglist()
