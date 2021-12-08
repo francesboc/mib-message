@@ -41,7 +41,7 @@ paths:
               properties: 
                 receiver: 
                   type: string
-                  description: Email of the user
+                  description: Id of the user
                   example: "1"
                 date:
                   type: string

@@ -25,6 +25,7 @@ class MsglistManager(Manager):
             Msglist.query.filter(Msglist.message_id==message_id).filter(Msglist.receiver_id==id).delete()
         # add new receivers
         for receiver_id in list_of_receivers:
+            # check if the receiver is already in msglist
             check = Msglist.query.filter(Msglist.message_id==message_id).filter(Msglist.receiver_id==receiver_id).first()
             if check is None:
                 msglist = Msglist()

@@ -33,11 +33,12 @@ class MessageManager(Manager):
         return Message.query.filter(Message.sender == sender_id).filter(Message.is_draft == True).all()
     
     @staticmethod
-    def update_msg(msg_id, title, content, new_date, font, isDraft):
+    def update_msg(msg_id, title, content, new_date, font, isDraft, bad_content, number_bad):
         stmt = (
             update(Message).
             where(Message.id==int(msg_id)).
-            values(title=title, content=content,date_of_delivery=new_date,font=font,is_draft=isDraft)
+            values(title=title, content=content,date_of_delivery=new_date,
+                font=font,is_draft=isDraft, bad_content=bad_content, number_bad=number_bad)
         )
         
         db.session.execute(stmt)
