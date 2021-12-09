@@ -69,6 +69,7 @@ class Msglist(db.Model):
     message_id = db.Column(db.Integer, db.ForeignKey('Message.id')) # msg in witch the image is
     receiver_id = db.Column(db.Integer, nullable=False)
     read = db.Column(db.Boolean, default=False)
+    read_notification = db.Column(db.Boolean, default=False)
     notified = db.Column(db.Boolean, default=False)
     hasReported = db.Column(db.Boolean, default=False) #this is to know if a user has already reported a specific message
 

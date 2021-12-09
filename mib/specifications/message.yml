@@ -207,7 +207,25 @@ paths:
           description: Return list of images
         default:
           description: An error occured during retrieving the message list
-
+  /notify/{msg_list_id}:
+    post:
+      summary: Notify the read of a message
+      tags:
+        - Message
+      operationId: mib.resources.messages.notify_read
+      parameters:
+        - name: msg_list_id
+          description: Message list unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Read set correctly
+        400:
+          description: The message is already inside
   /message/forward/{user_id}:
     post:
       summary: Forward a message

@@ -8,6 +8,7 @@ from mib.models.message import Message, Image, Msglist
 from datetime import datetime
 from dateutil.parser import parse
 import base64
+from background import notify
 import json
 
 def get_all_messages(sender_id):
@@ -359,13 +360,6 @@ def forward(user_id):
     print(destinators,msgid)
     return MsglistManager.forward(user_id,destinators,ms)
     
-
-
-#  elif msg_exist.is_draft == True:
-#             #just delete the draft
-#             delete_ = db.session.query(Messages).filter(Messages.id == msg_id).first()
-#             db.session.delete(delete_)
-#             db.session.commit()
-#             return render_template('get_msg_send_draft.html', draft=_draft, send=_send)
-#         else:
-#             return render_template('get_msg_send_draft.html', draft=_draft, send=_send, action = "Something went wrong...")
+def notify_read(msg_list_id):
+    MsglistManager.update_read_user(msg_list_id)
+    return jsonify({'message': 'success'}),200
