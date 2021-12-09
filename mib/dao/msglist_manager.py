@@ -95,6 +95,16 @@ class MsglistManager(Manager):
     @staticmethod
     def get_list_by_id_and_receiver(msg_id, receiver_id):
         return Msglist.query.filter(Msglist.message_id==msg_id).filter(Msglist.receiver_id==receiver_id).first()
+
+    @staticmethod
+    def report_user(msg_id,user_id):
+        msg = MsglistManager.get_list_by_id_and_receiver(msg_id,user_id)
+        if msg is not None:
+            msg.set_has_reported(True)
+            db.session.commit()
+            return {'message':'OK'}
+        else:
+            return {'message':'not found'}
     
     @staticmethod
     def forward(user_id,destinators,msgid):
