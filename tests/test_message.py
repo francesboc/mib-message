@@ -40,11 +40,11 @@ class TestMessage(ViewTest):
         #create new msg
         data = {
                 'payload': {
-                  'title': 'New Message to you',
+                  'title': '',
                   'content': '',
                   'date_of_delivery': '2022-01-01',
                   'time_of_delivery': '10:21',
-                  'font': 'Arial',
+                  'font': '',
                   'destinator': [
                     2,
                     1
@@ -57,10 +57,18 @@ class TestMessage(ViewTest):
                 'raw_images': my_raw_img,
                 'mimetypes': my_mimetypes}
         
+        # try to create a message with empty title
+        r  = self.client.post('message/send',json=data)
+        assert r.status_code == 400
+        # try to send a message
+        data['payload']['title'] = 'New Message to you'
         r  = self.client.post('message/send',json=data)
         assert r.status_code == 201
         print(r.data)
         
+        # try to set the message as read
+        r = self.client.post('notify/1')
+        assert r.status_code == 200
         print('o'*40)
         r = self.client.get('messages/all/1')
         print(r.data)
@@ -106,16 +114,25 @@ class TestMessage(ViewTest):
                 'raw_images': my_raw_img,
                 'mimetypes': my_mimetypes}
         
+        
         r  = self.client.post('message/send',json=data)
         
         data = {
             "receiver": "1",
-            "date": "2022-01-01 10:00",
+            "date": "2022-01-01 10:30",
             "filter": False}
 
         r = self.client.post('messages/received/', json=data)
         assert r.status_code == 200
-  
+
+        data = {
+            "receiver": "1",
+            "date": "2022-01-01 10:30",
+            "filter": True}
+
+        r = self.client.post('messages/received/', json=data)
+        assert r.status_code == 200
+
         r = self.client.get('message/list/2/1')
         assert r.status_code == 200
 
@@ -159,7 +176,18 @@ class TestMessage(ViewTest):
       
       r = self.client.post('message/draft',json=data)
       assert r.status_code == 201
-      
+
+      # try to re draft a message
+      data['message_id'] = 1
+      r = self.client.post('message/draft',json=data)
+      assert r.status_code == 200
+
+      # try to re draft with an empty data. It is set to now
+      data['payload']['date_of_delivery'] = ''
+      data['payload']['time_of_delivery'] = ''
+      r = self.client.post('message/draft',json=data)
+      assert r.status_code == 200
+
       print('t'*60)
       r = self.client.get('messages/all/1')
       print(r.data)
@@ -186,9 +214,6 @@ class TestMessage(ViewTest):
               'raw_images': my_raw_img,
               'mimetypes': my_mimetypes}
 
-      
-      
-      #draft a already drafted msg
       data_2 = {
               'payload': {
                 'title': 'New Message drafted to update cdknkcs',
@@ -212,11 +237,19 @@ class TestMessage(ViewTest):
       r = self.client.post('message/draft',json=data)
       assert r.status_code == 200
       
+      # try to draft with an empty date. Date should be set to today
+      data['payload']['date_of_delivery'] = ''
+      r = self.client.post('message/draft',json=data)
+      assert r.status_code == 200
       
       #send a drafted msg
       r = self.client.post('message/send',json=data_2)
       assert r.status_code == 200
-          
+
+      #try to send with an empty date. Message should be refused
+      data['message_id'] = 0
+      r = self.client.post('message/send',json=data)
+      assert r.status_code == 400
       
     def test_delete_msg(self):
           
@@ -300,24 +333,62 @@ class TestMessage(ViewTest):
         r = self.client.get('message/3/images')
         assert r.status_code == 200
         
-    def test_forward_msg(self):
-          data = {
-            'destinators': [4,5],
-            'messageid': '2'
-          }
-          r = self.client.post('message/forward/2', json = data)
-          assert r.status_code == 200
-          
-          data = {
-            'destinators': [],
-            'messageid': '99'
-          }
-          r = self.client.post('message/forward/2', json = data)
-          assert r.status_code == 400
-          
-          
-          
-   
+    def test_forward_and_report_msg(self):
+      data1= {
+        'payload': {
+          'title': 'hellooooooo',
+          'content': '',
+          'date_of_delivery': '2022-01-01',
+          'time_of_delivery': '10:23',
+          'font': 'Arial',
+          'destinator': [
+            2,
+            1
+          ]
+        },
+        'sender': 1,
+        'message_id': 0, #id will be generated automatically
+        'delete_image_ids': [],
+        'delete_user_ids': [],
+        'raw_images': [],
+        'mimetypes': []
+      }
+      
+      r  = self.client.post('message/send',json=data1)
+      assert r.status_code == 201
+
+      data = {
+        'destinators': [3],
+        'messageid': '1'
+      }
+      r = self.client.post('message/forward/1', json = data)
+      assert r.status_code == 200
+      
+      data = {
+        'destinators': [],
+        'messageid': '99'
+      }
+      r = self.client.post('message/forward/2', json = data)
+      assert r.status_code == 400
+
+      # try to report a user with non existing message
+      r = self.client.post('report/100/2')
+      assert r.status_code == 404
+
+      # try to report a user without bad word in message
+      r = self.client.post('report/1/2')
+      assert r.status_code == 201
+
+      #insert a message with a bad content
+      data1['payload']['content'] = "fuck you"
+      r  = self.client.post('message/send',json=data1)
+      assert r.status_code == 201
+
+      # try to report a user with bad word in message
+      r = self.client.post('report/3/2')
+      assert r.status_code == 200
+
+
     def test_send_with_images(self):
           
       wget.download("https://github.com/fluidicon.png","/tmp",bar=None) # downloading an image

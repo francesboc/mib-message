@@ -44,8 +44,8 @@ def API_call(content):
     import urllib.request,urllib.parse, urllib.error
     url = 'https://neutrinoapi.net/bad-word-filter'
     params = {
-            'user-id': 'flaskapp10',
-            'api-key': '6OEjKKMDzj3mwfwLJfRbmiOAXamekju4dQloU95eCAjPYjO1',
+            'user-id': 'flaskapp11',
+            'api-key': 'OqwP2B4TN0t7Iuj5r3rsxq3xOXLD2bG90vdPVv4EOxkc5Cq6',
             'content': content
     }
     postdata = urllib.parse.urlencode(params).encode()
@@ -89,10 +89,8 @@ def send():
             result= {'is-bad': False}
 
         # Check if message was drafted and then sended
-        try: 
-            msg_id =  post_data.get('message_id')
-        except KeyError:
-            msg_id = 0
+        
+        msg_id =  post_data.get('message_id')
 
         if msg_id != 0:
             # message was drafted and then sent
@@ -103,11 +101,9 @@ def send():
             MsglistManager.update_receivers(msg_id, user_id_to_delete, list_of_receiver)
             
             new_date = date_of_delivery +" "+time_of_delivery
-            try:
-                new_date = parse(new_date)
-            except ValueError:
-                new_date = datetime.now().strftime('%Y-%m-%d') + " " + datetime.now().strftime('%H:%M')
-                new_date = datetime.strptime(new_date,'%Y-%m-%d %H:%M')
+            
+            new_date = parse(new_date)
+            
             for image_id in image_id_to_delete:
                 image = ImageManager.retrieve_by_id(image_id)
                 if image is not None:
@@ -149,12 +145,10 @@ def send():
         message.set_font(font)
         message.set_sender(sender)
         new_date = date_of_delivery +" "+time_of_delivery
-        try:
-            new_date = parse(new_date)
-            message.set_delivery_date(new_date)
-        except ValueError:
-            new_date = datetime.now().strftime('%Y-%m-%d') + " " + datetime.now().strftime('%H:%M')
-            message.set_delivery_date(datetime.strptime(new_date,'%Y-%m-%d %H:%M'))
+
+        new_date = parse(new_date)
+        message.set_delivery_date(new_date)
+        
         message.set_draft(False)
         
         #Setting the message (bad content filter) in database
@@ -235,6 +229,7 @@ def delete_message_by_id(message_id):
         'status': 'Succes',
         'message': 'Message delete',}
     return jsonify(response), 200
+
 def draft_message():
     """This method allows the creation of a new drafted message.
     """
@@ -373,6 +368,7 @@ def report(message_id,receiver_id):
             return jsonify({'message':'This message does not exist'}),404
     else:
         return jsonify({'message':'No bad wards detected'}), 201
+
 def forward(user_id):
     post_data = request.get_json()
     destinators = post_data['destinators']
