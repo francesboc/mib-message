@@ -22,6 +22,18 @@ class MsglistManager(Manager):
     def get_receivers(message_id: str):
         _receivers = Msglist.query.filter(Msglist.message_id == message_id).all()
         return [ k.receiver_id for k in _receivers ]
+    
+    @staticmethod
+    def update_notified_user(message_id, user_id):
+        # updating notified status
+        stmt = (
+            update(Msglist).
+            where(Msglist.message_id==message_id, Msglist.notified == False, Msglist.receiver_id==user_id).
+            values(notified=True)
+        )
+        db.session.execute(stmt)
+        db.session.commit()
+    
 
     @staticmethod
     def update_receivers(message_id: str, user_id_to_delete: list, list_of_receivers: list):
