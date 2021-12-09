@@ -1,3 +1,4 @@
+from flask.json import jsonify
 from mib.dao.manager import Manager
 from mib.models.message import Msglist
 from sqlalchemy import insert, update,delete
@@ -63,3 +64,35 @@ class MsglistManager(Manager):
     @staticmethod
     def get_list_by_id_and_receiver(msg_id, receiver_id):
         return Msglist.query.filter(Msglist.message_id==msg_id).filter(Msglist.receiver_id==receiver_id).first()
+    
+    @staticmethod
+    def forward(user_id,destinators,msgid):
+        #check if the user is already inside
+        users = Msglist.query.filter(Msglist.message_id==msgid).all()
+        if(users != []):
+            for d in destinators:
+                if(aux_contains(users,d))==False:
+                    msglist = Msglist()
+                    msglist.set_message_id(msgid)
+                    msglist.set_receiver_id(d)
+                    Manager.create(msglist=msglist)
+            db.session.commit()
+            return jsonify({'status':'OK'}),200
+        else:
+            return jsonify({'status':'KO'}),400
+
+
+            
+    
+def aux_contains(a,element):
+
+        for i in a:
+            if element == i.get_id():
+                return True
+        return False
+
+
+            
+
+
+

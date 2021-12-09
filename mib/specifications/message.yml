@@ -207,8 +207,53 @@ paths:
           description: Return list of images
         default:
           description: An error occured during retrieving the message list
+
+  /message/forward/{user_id}:
+    post:
+      summary: Forward a message
+      tags:
+        - Message
+      operationId: mib.resources.messages.forward
+      parameters:
+        - name: user_id
+          description: Message unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Insert inside the message list the other ids for the forward
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Forward'    
+      responses:
+        200:
+          description: Created
+        400:
+          description: The message is already inside
+
 components:
   schemas:
+    Forward:
+      required:
+        - destinators
+        - messageid
+      type: object
+      properties:
+        destinators:
+          type: array
+          items:
+              type: integer
+              description: List of users who will receive the message
+          example: [2,1]
+        messageid:
+          type: string
+          description: Id of the message
+          example: '0'
+
     Message:
       required:
         - sender
