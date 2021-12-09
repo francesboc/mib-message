@@ -39,3 +39,5 @@ dnspython==2.0.0
 email-validator==1.1.1
 importlib-resources==3.3.0
 flask-rabmq==0.0.18
+wget==3.2
+flask-mail==0.9.1

@@ -55,24 +55,3 @@ class MessageManager(Manager):
     def delete_message_by_id(id_: int):
         message = MessageManager.retrieve_by_id(id_)
         MessageManager.delete_message(message)    
-
-    #@staticmethod
-    #def retrieve_by_email(email):
-    #    Manager.check_none(email=email)
-    #    return User.query.filter(User.email == email).first()
-    #
-    #@staticmethod
-    #def retrieve_by_phone(phone):
-    #    Manager.check_none(phone=phone)
-    #    return User.query.filter(User.phone == phone).first()
-#
-    #@staticmethod
-    #def update_user(user: User):
-    #    Manager.update(user=user)
-#
-#
-    ##retrieve all users in the DB filtering 
-    #@staticmethod
-    #def retrieve_all():
-    #    return User.query.all()
-    
