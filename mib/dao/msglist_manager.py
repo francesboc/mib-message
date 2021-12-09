@@ -1,3 +1,4 @@
+from flask.json import jsonify
 from mib.dao.manager import Manager
 from mib.models.message import Msglist
 from sqlalchemy import insert, update,delete
@@ -22,6 +23,18 @@ class MsglistManager(Manager):
     def get_receivers(message_id: str):
         _receivers = Msglist.query.filter(Msglist.message_id == message_id).all()
         return [ k.receiver_id for k in _receivers ]
+    
+    @staticmethod
+    def update_notified_user(message_id, user_id):
+        # updating notified status
+        stmt = (
+            update(Msglist).
+            where(Msglist.message_id==message_id and Msglist.notified == False and Msglist.receiver_id==user_id).
+            values(notified=True)
+        )
+        db.session.execute(stmt)
+        db.session.commit()
+    
 
     @staticmethod
     def update_receivers(message_id: str, user_id_to_delete: list, list_of_receivers: list):
@@ -61,3 +74,35 @@ class MsglistManager(Manager):
             return {'message':'OK'}
         else:
             return {'message':'not found'}
+    
+    @staticmethod
+    def forward(user_id,destinators,msgid):
+        #check if the user is already inside
+        users = Msglist.query.filter(Msglist.message_id==msgid).all()
+        if(users != []):
+            for d in destinators:
+                if(aux_contains(users,d))==False:
+                    msglist = Msglist()
+                    msglist.set_message_id(msgid)
+                    msglist.set_receiver_id(d)
+                    Manager.create(msglist=msglist)
+            db.session.commit()
+            return jsonify({'status':'OK'}),200
+        else:
+            return jsonify({'status':'KO'}),400
+
+
+            
+    
+def aux_contains(a,element):
+
+        for i in a:
+            if element == i.get_id():
+                return True
+        return False
+
+
+            
+
+
+

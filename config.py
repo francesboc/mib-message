@@ -62,7 +62,7 @@ class ProdConfig(DevConfig):
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNMANE = os.getenv('FLASK_MAIL_USERNAME',None)
-    MAIL_USERNMANE = os.getenv('FLASK_MAIL_PASSWORD',None)
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME',None)
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD',None)
     MAIL_DEFAULT_SENDER = 'flaskapp10@gmail.com'
 

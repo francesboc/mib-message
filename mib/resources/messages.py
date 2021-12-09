@@ -374,6 +374,16 @@ def report(message_id,receiver_id):
             return jsonify({'message':'This message does not exist'}),404
     else:
         return jsonify({'message':'No bad wards detected'}), 201
+def forward(user_id):
+    post_data = request.get_json()
+    destinators = post_data['destinators']
+    msgid =post_data['messageid']
+    ms = int(msgid)
+    print(destinators,msgid)
+    return MsglistManager.forward(user_id,destinators,ms)
+    
+
+
 #  elif msg_exist.is_draft == True:
 #             #just delete the draft
 #             delete_ = db.session.query(Messages).filter(Messages.id == msg_id).first()

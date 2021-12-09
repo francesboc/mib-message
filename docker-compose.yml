@@ -46,6 +46,34 @@ services:
       - POSTGRES_HOST=db
     restart: on-failure
 
+  redis:
+    #
+    # Message Microservice Redis node
+    #
+    image: "redis:alpine"
+    command: redis-server
+    restart: on-failure
+    expose:
+      - "6379"
+
+  celery:
+    #
+    # Message Microservice celery node
+    #
+    #image: "celery-message:latest"
+    image: celery:latest
+    build: .
+    restart: on-failure
+    environment:
+      - POSTGRES_HOST=db
+      - REDIS_HOST=redis
+    env_file:
+      - env_file
+    command: celery -A background worker --loglevel=INFO -B
+    depends_on:
+      - db
+      - redis
+
 # Declaring all volumes
 volumes:
   pgdata: # for maintaing db data
