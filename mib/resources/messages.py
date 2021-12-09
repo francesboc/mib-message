@@ -58,6 +58,7 @@ def send():
     post_data = request.get_json()
     payload = post_data['payload']
     r = verif_data(payload) #check on date of delivery
+    result = {}
     if r=="OK":
         #get the values from form fields
         list_of_receiver = payload["destinator"]
@@ -70,7 +71,7 @@ def send():
             return jsonify({
                 'message': 'Message with empty title'
             }), 400
-
+        
         list_of_images = post_data.get('raw_images')
         list_of_mimetypes = post_data.get('mimetypes')
         sender = post_data.get('sender')
@@ -123,6 +124,8 @@ def send():
                 ImageManager.add_image(img)
 
             #Setting the message (bad content filter) in database
+            print("RESULT")
+            print(result)
             if(result['is-bad']==True):
                 bad_content=True
                 number_bad = len(result["bad-words-list"])
@@ -157,7 +160,7 @@ def send():
         
         #Setting the message (bad content filter) in database
         if(result['is-bad']==True):
-            message.set_bad_content=True
+            message.bad_content=True
             message.number_bad = len(result["bad-words-list"])
         else:
             message.bad_content=False
@@ -196,9 +199,15 @@ def get_messages_received():
     msglist = MsglistManager.get_messages_by_receiver_id(receiver_id)
     messages = []
     for elem in msglist:
-        message = MessageManager.retrieve_by_id_until_now(elem.message_id,date, filter)
+        message = MessageManager.retrieve_by_id_until_now(elem.message_id,date)
         if message != None:
-            messages.append(message)
+            if filter:
+                #only message with bad_content == false
+                if message.bad_content == False:
+                    messages.append(message)
+            else:
+                #retrieve all messages
+                messages.append(message)
 
     result = [msg.serialize() for msg in messages]
 
@@ -302,6 +311,7 @@ def draft_message():
     message.set_content(content)
     message.set_font(font)
     message.set_sender(sender)
+    message.bad_content = False
     new_date = date_of_delivery +" "+time_of_delivery
     try:
         new_date = parse(new_date)
@@ -351,7 +361,19 @@ def delete_receiver(msg_id, receiver_id):
     MsglistManager.delete_receiver(msg_id,receiver_id)
     return jsonify({'message': 'success'}),200
 
-
+def report(message_id,receiver_id):
+    msg = MessageManager.retrieve_by_id(message_id)
+    if not msg:
+        return jsonify({'message':'This message does not exist'}),404
+    if msg.bad_content == True:
+        mesg = MsglistManager.report_user(message_id,receiver_id)
+        if mesg['message'] == 'OK':
+            return jsonify({'message':'This message has been correctly reported','id':msg.id}),200
+        else:
+            #this should never happen
+            return jsonify({'message':'This message does not exist'}),404
+    else:
+        return jsonify({'message':'No bad wards detected'}), 201
 #  elif msg_exist.is_draft == True:
 #             #just delete the draft
 #             delete_ = db.session.query(Messages).filter(Messages.id == msg_id).first()
