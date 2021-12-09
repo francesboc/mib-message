@@ -207,7 +207,37 @@ paths:
           description: Return list of images
         default:
           description: An error occured during retrieving the message list
-
+  /report/{message_id}/{receiver_id}:
+    post:
+      summary: Report a message if it is present
+      tags:
+        - Report
+      description: Report a message and the related sender
+      operationId: mib.resources.messages.report
+      parameters:
+        - name: message_id
+          description: Message unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: receiver_id
+          description: Receiver unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Return an ok message
+        '404':
+          description: Message id not found
+        '201':
+          description: No bad words detected
+        default:
+          description: An error occured during retrieving the message list
   /message/forward/{user_id}:
     post:
       summary: Forward a message

@@ -17,12 +17,11 @@ class MessageManager(Manager):
         return Message.query.get(id_)
     
     @staticmethod
-    def retrieve_by_id_until_now(id, date, filter):
+    def retrieve_by_id_until_now(id, date):
         Manager.check_none(id=id)
         return Message.query.filter(Message.id == id) \
             .filter(Message.date_of_delivery <= date) \
-            .filter(Message.is_draft==False) \
-            .filter(Message.bad_content==filter).first()
+            .filter(Message.is_draft==False).first()
 
     @staticmethod
     def retrieve_sent_by_id(sender_id):
