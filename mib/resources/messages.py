@@ -15,7 +15,6 @@ def get_all_messages(sender_id):
     """Get the list of sent and drafted messages
     """
 
-    # Need to check the presence of message with sender_id?
 
     _sent_messages = MessageManager.retrieve_sent_by_id(sender_id)
     _drafted_messages = MessageManager.retrieve_drafted_by_id(sender_id)
@@ -125,8 +124,7 @@ def send():
                 ImageManager.add_image(img)
 
             #Setting the message (bad content filter) in database
-            print("RESULT")
-            print(result)
+          
             if(result['is-bad']==True):
                 bad_content=True
                 number_bad = len(result["bad-words-list"])
@@ -380,7 +378,6 @@ def forward(user_id):
     destinators = post_data['destinators']
     msgid =post_data['messageid']
     ms = int(msgid)
-    print(destinators,msgid)
     return MsglistManager.forward(user_id,destinators,ms)
     
 def notify_read(msg_list_id):

@@ -4,14 +4,6 @@ from mib import db
 import base64
 
 
-#msglist = db.Table('msglist',
-#    db.Column('msg_id', db.Integer, db.ForeignKey('Message.id'), primary_key=True),
-#    db.Column('user_id', db.Integer, primary_key=True),
-#    db.Column('read',db.Boolean, default=False),
-#    db.Column('notified',db.Boolean, default=False),
-#    db.Column('hasReported', db.Boolean, default=False) #this is to know if a user has already reported a specific message
-#)
-
 class Message(db.Model):
     """Representation of User model."""
 
