@@ -12,16 +12,23 @@ from celery import Celery
 from celery.schedules import crontab
 from smtplib import SMTPRecipientsRefused
 import requests
+import os
 from celery.signals import worker_ready
 import requests
 
 from sqlalchemy.util.langhelpers import MemoizedSlots
 from mib import create_app
 
-BACKEND = BROKER = 'redis://message_ms_redis:6379'
+REDIS_HOST = os.getenv("REDIS_HOST", None)
+USERS_MS_HOST = os.getenv("USERS_MS_HOST", None)
+
+BACKEND = BROKER = 'redis://'+ REDIS_HOST +':6379'
+
+if USERS_MS_HOST != None: 
+    USERS_MS = 'http://'+USERS_MS_HOST+':5000'
+
 celery = Celery(__name__, backend=BACKEND, broker=BROKER)
 
-USERS_MS = 'http://users_ms_worker:5000'
 
 celery.conf.timezone = 'Europe/Rome'
 _APP = None
@@ -29,7 +36,7 @@ _APP = None
 @celery.on_after_configure.connect
 def setup_periodic_task(sender, **kwargs):
    # Calls check_messages() task every 5 (300) minutes to send email for unregisred users
-    sender.add_periodic_task(10.0, check_messages.s(), name='checking messages every 5 minutes')
+    sender.add_periodic_task(20.0, check_messages.s(), name='checking messages every 5 minutes')
 
 # task fo the lottery
 @celery.task
@@ -104,10 +111,10 @@ def check_messages():
                             # Sender is not in the blacklist. Generating the email
                             subject = message.title
                             body = message.content
-                            to_email = user.email
+                            to_email = user['email']
                             receiver_id = receiver.receiver_id
                             msg_id = message.id
-                            user_is_active = user.is_active
+                            user_is_active = user['is_active']
                         
                             if user_is_active:
                                 # we need to notify the user for a new message

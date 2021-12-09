@@ -29,7 +29,7 @@ class MsglistManager(Manager):
         # updating notified status
         stmt = (
             update(Msglist).
-            where(Msglist.message_id==message_id, Msglist.notified == False, Msglist.receiver_id==user_id).
+            where(Msglist.message_id==message_id and Msglist.notified == False and Msglist.receiver_id==user_id).
             values(notified=True)
         )
         db.session.execute(stmt)

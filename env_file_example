@@ -12,5 +12,13 @@ FLASK_ENV=development
 # POSTGRES_HOST=
 #
 POSTGRES_PASSWORD=abcd
-POSTGRES_USER=mib_users_ms
-POSTGRES_DB=mib_users_ms
+POSTGRES_USER=mib_messages_ms
+POSTGRES_DB=mib_messages_ms
+
+#
+#
+# Flask mail configuration
+#
+#--------------------------
+MAIL_USERNAME=flaskapp10@gmail.com
+MAIL_PASSWORD=pXs5PjloLfC7
