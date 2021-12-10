@@ -379,15 +379,6 @@ class TestMessage(ViewTest):
       r = self.client.post('report/1/2')
       assert r.status_code == 201
 
-      #insert a message with a bad content
-      data1['payload']['content'] = "fuck you"
-      r  = self.client.post('message/send',json=data1)
-      assert r.status_code == 201
-
-      # try to report a user with bad word in message
-      r = self.client.post('report/3/2')
-      assert r.status_code == 200
-
 
     def test_send_with_images(self):
           
